@@ -1,0 +1,2630 @@
+<!doctype html>
+<html lang="ja" data-motion="full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; base-uri 'none'; object-src 'none'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="description" content="PHPの重大な脆弱性（2026年10月）を題材に、Webの仕組みから対策までをゲームで学ぶ、民間の無料学習プロジェクト。">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="CYBER QUEST JAPAN for PHP｜サイバーセキュリティを遊びながら学ぶ">
+  <meta property="og:description" content="守る力は、知ることから始まる。PHPの脆弱性ニュースを題材に、Webの仕組みから対策までをゲームで学ぶ無料の学習ゲーム。">
+  <meta name="twitter:card" content="summary">
+  <meta name="theme-color" content="#06122b">
+  <title>CYBER QUEST JAPAN for PHP</title>
+  
+  <style>/* CYBER QUEST JAPAN for PHP — ダークテーマ。可読性とコントラスト優先。色だけに頼らず、アイコン・文字も併用する。 */
+:root {
+  --bg: #06122b; --bg2: #0a1d42; --card: #0d2150; --card2: #122a60; --line: #24407f;
+  --text: #eaf3ff; --muted: #a9bfdf; --cyan: #22d3ee; --cyan-d: #0e7490;
+  --ok: #4ade80; --ok-bg: #0f3a2a; --ng: #fb7185; --ng-bg: #4a1626; --warn: #fbbf24; --warn-bg: #3d2f0b; --info-bg: #0b3550;
+  --radius: 14px;
+  --font: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", "Meiryo", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: radial-gradient(1200px 600px at 80% -10%, #12306e 0%, transparent 60%), var(--bg); color: var(--text); font-family: var(--font); line-height: 1.75; font-size: 17px; }
+[data-motion="reduce"] html, html[data-motion="reduce"] { scroll-behavior: auto; }
+html[data-motion="reduce"] *, html[data-motion="reduce"] *::before, html[data-motion="reduce"] *::after { animation: none !important; transition: none !important; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { animation: none !important; transition: none !important; } }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+.main { padding-top: 20px; padding-bottom: 40px; outline: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.skip { position: absolute; left: -999px; top: 0; background: var(--cyan); color: #00131c; padding: 8px 14px; z-index: 100; font-weight: 700; }
+.skip:focus { left: 8px; top: 8px; }
+a { color: #7dd3fc; text-underline-offset: 3px; }
+a:hover { color: #bae6fd; }
+:focus-visible { outline: 3px solid var(--warn); outline-offset: 2px; border-radius: 6px; }
+h1 { font-size: 1.9rem; line-height: 1.35; margin: 0.3em 0 0.5em; }
+h2 { font-size: 1.35rem; line-height: 1.4; margin: 1.2em 0 0.5em; }
+h3 { font-size: 1.12rem; line-height: 1.45; margin: 1em 0 0.4em; }
+h4 { margin: 1em 0 0.3em; }
+[tabindex="-1"]:focus { outline: none; }
+.muted { color: var(--muted); }
+.small { font-size: 0.88rem; }
+.lead { font-size: 1.1rem; color: #d6e6ff; }
+code, pre { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Noto Sans Mono CJK JP", monospace; }
+
+/* ヘッダー */
+.site-header { background: rgba(6, 18, 43, 0.92); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 20; backdrop-filter: blur(6px); }
+.bar-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 8px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 8px; color: var(--text); text-decoration: none; font-weight: 800; letter-spacing: 0.02em; }
+.brand-text { font-size: 1.05rem; }
+.lvchip { font-size: 0.85rem; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; color: #cfe6ff; }
+.nav { display: flex; gap: 4px; flex-wrap: wrap; padding-bottom: 8px; padding-top: 4px; }
+.nav a { color: var(--text); text-decoration: none; padding: 5px 11px; border-radius: 8px; font-size: 0.92rem; border: 1px solid transparent; }
+.nav a:hover { background: var(--card); }
+.nav a[aria-current="page"] { background: var(--cyan-d); border-color: var(--cyan); }
+.site-footer { color: var(--muted); font-size: 0.85rem; padding-bottom: 40px; border-top: 1px solid var(--line); margin-top: 20px; padding-top: 14px; }
+
+/* ボタン */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font: inherit; font-weight: 700; padding: 10px 18px; min-height: 44px; border-radius: 10px; border: 2px solid var(--cyan); background: var(--cyan); color: #00131c; cursor: pointer; text-decoration: none; transition: transform 0.12s, background 0.12s; }
+.btn:hover { background: #67e8f9; color: #00131c; transform: translateY(-1px); }
+.btn.ghost { background: transparent; color: var(--text); border-color: var(--line); }
+.btn.ghost:hover { background: var(--card2); border-color: var(--cyan); color: var(--text); }
+.btn.danger { background: transparent; color: #fecdd3; border-color: var(--ng); }
+.btn.danger:hover { background: var(--ng-bg); color: #fff; }
+.btn.small { min-height: 36px; padding: 4px 12px; font-size: 0.88rem; }
+.btn.big { font-size: 1.1rem; padding: 14px 24px; }
+.btn[disabled], .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+.btn.primary[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--cyan); }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 16px 0 4px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+
+/* カード */
+.card { background: linear-gradient(180deg, var(--card), var(--bg2)); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; margin: 14px 0; }
+.cards { display: grid; gap: 10px; }
+.chip { display: inline-block; background: var(--card2); border: 1px solid var(--line); border-radius: 999px; padding: 1px 11px; font-size: 0.82rem; margin: 2px 6px 2px 0; color: #d6e6ff; }
+.chip.ok { border-color: var(--ok); color: #bbf7d0; }
+.meta-row { display: flex; flex-wrap: wrap; gap: 2px; margin: 8px 0; }
+.sep { border: 0; border-top: 1px dashed var(--line); margin: 22px 0; }
+.warn-text { color: var(--warn); }
+
+/* 注意書き */
+.note { border-left: 5px solid var(--cyan); background: var(--info-bg); padding: 10px 14px; border-radius: 8px; margin: 12px 0; }
+.note-warn { border-color: var(--warn); background: var(--warn-bg); }
+.note-fact { border-color: #a78bfa; background: #261a52; }
+
+/* バッジ（色＋アイコン＋文字） */
+.badge { display: inline-block; border-radius: 6px; padding: 0 8px; font-size: 0.78rem; font-weight: 700; border: 1px solid; white-space: nowrap; }
+.badge-confirmed { color: #bbf7d0; border-color: var(--ok); background: var(--ok-bg); }
+.badge-secondary { color: #fde68a; border-color: var(--warn); background: var(--warn-bg); }
+.badge-unconfirmed { color: #fecdd3; border-color: var(--ng); background: var(--ng-bg); }
+details.fact { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 4px 14px; }
+details.fact[open] { background: var(--card2); }
+details.fact summary { cursor: pointer; padding: 10px 0; font-weight: 700; }
+.fact-title { margin-right: 6px; }
+.fact-body { padding-bottom: 10px; }
+.caveat { color: #fde68a; font-size: 0.93rem; }
+.fact-src ul { padding-left: 1.2em; font-size: 0.9rem; }
+
+/* ヒーロー */
+.hero { display: grid; grid-template-columns: 1.3fr 1fr; gap: 22px; align-items: center; padding: 18px 0 8px; }
+.hero h1 { font-size: 2.3rem; margin: 0.2em 0; }
+.hero-logo { display: flex; gap: 8px; align-items: center; color: var(--cyan); font-weight: 800; letter-spacing: 0.06em; }
+.hero-panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; }
+.lv-line { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.lv-badge { background: var(--cyan); color: #00131c; font-weight: 800; border-radius: 8px; padding: 0 10px; }
+.progress-total { margin: 12px 0; }
+.progress-total strong { font-size: 1.6rem; margin: 0 6px; }
+.bar { height: 12px; background: #0a1a3d; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; margin: 6px 0; }
+.bar.small { height: 8px; }
+.bar-fill { height: 100%; background: linear-gradient(90deg, #0ea5c6, var(--cyan)); transition: width 0.5s ease; }
+.bar.risk .bar-fill { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+.bar.impact .bar-fill { background: linear-gradient(90deg, #6366f1, #a78bfa); }
+.trial-teaser { display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; background: linear-gradient(90deg, #0f2a63, #0a3a5a); border: 1px solid var(--cyan-d); border-radius: var(--radius); padding: 14px 20px; margin: 24px 0; }
+.unconfirmed-note { border: 1px dashed var(--line); border-radius: var(--radius); padding: 4px 20px 16px; }
+
+/* ステージカード */
+.stage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+.stage-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; display: flex; flex-direction: column; gap: 4px; }
+.stage-card h3 { margin: 0.2em 0; }
+.stage-card .btn { margin-top: auto; align-self: flex-start; }
+.stage-card.cleared { border-color: var(--ok); }
+.stage-card.locked { opacity: 0.8; border-style: dashed; }
+.sc-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.sc-no { font-weight: 800; color: var(--cyan); letter-spacing: 0.06em; }
+.status { font-size: 0.82rem; font-weight: 700; }
+.status.ok { color: var(--ok); } .status.open { color: #7dd3fc; } .status.lock { color: var(--muted); }
+
+/* ステージ進行 */
+.stage-head h2 { margin-top: 6px; }
+.stepbar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.stepdot { width: 28px; height: 28px; border-radius: 50%; display: inline-grid; place-items: center; background: var(--card); border: 2px solid var(--line); font-size: 0.8rem; font-weight: 700; }
+.stepdot.done { background: var(--ok-bg); border-color: var(--ok); color: #bbf7d0; }
+.stepdot.cur { border-color: var(--cyan); background: var(--cyan-d); }
+.intro-badge { display: inline-block; background: var(--cyan); color: #00131c; font-weight: 800; padding: 0 14px; border-radius: 8px; letter-spacing: 0.1em; }
+.prose p, .prose li { max-width: 46em; }
+.table-wrap { overflow-x: auto; margin: 10px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
+th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+thead th { background: var(--card2); }
+tbody th { background: #0a1a3d; font-weight: 600; }
+pre.code { background: #040c1e; border: 1px solid var(--line); border-radius: 10px; padding: 12px; overflow-x: auto; }
+
+/* 選択肢・問題 */
+fieldset { border: 0; padding: 0; margin: 10px 0; min-inline-size: 0; }
+fieldset.choices legend { padding: 0; margin-bottom: 6px; }
+.choice { display: flex; gap: 10px; align-items: flex-start; border: 2px solid var(--line); background: var(--card); border-radius: 12px; padding: 12px 14px; margin: 8px 0; cursor: pointer; }
+.choice:hover { border-color: var(--cyan); }
+.choice input { width: 22px; height: 22px; margin-top: 3px; accent-color: var(--cyan); flex: none; }
+.choice.sel { border-color: var(--cyan); background: var(--card2); }
+.choice.right { border-color: var(--ok); background: var(--ok-bg); }
+.choice.wrong { border-color: var(--ng); background: var(--ng-bg); }
+.choice-text { flex: 1; }
+.choice-mark { font-weight: 800; white-space: nowrap; margin-left: 8px; }
+.choices.inline { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.choices.inline legend { width: 100%; }
+.choices.inline .choice { margin: 4px 0; }
+.q-meta { margin-bottom: 4px; }
+.q-prompt { font-size: 1.2rem; margin-top: 0.4em; }
+.result { border-radius: 12px; padding: 12px 16px; margin: 14px 0; border: 2px solid; }
+.result.ok { border-color: var(--ok); background: var(--ok-bg); }
+.result.ng { border-color: var(--ng); background: var(--ng-bg); }
+.result-head { font-size: 1.1rem; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.xp-chip { background: var(--cyan); color: #00131c; border-radius: 999px; padding: 0 12px; font-weight: 800; font-size: 0.85rem; }
+.related { margin-top: 6px; }
+.order-list { list-style: none; padding: 0; margin: 10px 0; }
+.order-item { display: flex; align-items: center; gap: 10px; border: 2px solid var(--line); background: var(--card); border-radius: 12px; padding: 8px 12px; margin: 8px 0; flex-wrap: wrap; }
+.order-item.right { border-color: var(--ok); background: var(--ok-bg); }
+.order-item.wrong { border-color: var(--ng); background: var(--ng-bg); }
+.order-no { width: 28px; height: 28px; border-radius: 50%; background: var(--cyan-d); display: grid; place-items: center; font-weight: 800; flex: none; }
+.order-text { flex: 1; min-width: 12em; }
+.order-btns { display: flex; gap: 6px; }
+.codebox { background: #040c1e; border: 1px solid var(--line); border-radius: 10px; padding: 6px; margin: 8px 0; }
+.codeline { display: flex; align-items: baseline; gap: 12px; width: 100%; text-align: left; background: transparent; color: var(--text); border: 2px solid transparent; border-radius: 8px; padding: 4px 10px; font: inherit; cursor: pointer; min-height: 36px; }
+.codeline code { white-space: pre-wrap; word-break: break-all; flex: 1; font-size: 0.92rem; }
+.codeline:hover { background: var(--card); }
+.codeline.sel { border-color: var(--cyan); background: var(--card2); }
+.codeline.seen .ln { color: var(--ok); }
+.codeline.right { border-color: var(--ok); background: var(--ok-bg); }
+.codeline.wrong { border-color: var(--ng); background: var(--ng-bg); }
+.ln { color: var(--muted); width: 1.8em; text-align: right; flex: none; }
+
+/* フロー図・活動 */
+.flow-nodes { list-style: none; padding: 0; margin: 12px 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; counter-reset: n; }
+.flow-node button { width: 100%; height: 100%; text-align: left; font: inherit; color: var(--text); background: var(--card); border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; position: relative; min-height: 120px; }
+.flow-node button:hover { border-color: var(--cyan); }
+.flow-node.active button { border-color: var(--cyan); background: var(--card2); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.25); }
+.flow-node.passed button { border-color: #2b5aa8; }
+.flow-icon { font-size: 1.6rem; }
+.flow-name { font-weight: 800; }
+.flow-short { font-size: 0.85rem; color: var(--muted); }
+.packet { font-size: 0.8rem; color: var(--warn); font-weight: 700; animation: pulse 1.4s ease-in-out infinite; }
+.seen-mark { position: absolute; top: 6px; right: 10px; color: var(--ok); font-weight: 800; }
+.flow-detail { background: #07173a; border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; margin: 10px 0; min-height: 3.4em; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+.concept { background: #07173a; border: 1px solid var(--line); border-radius: 12px; padding: 4px 16px 10px; margin: 12px 0; }
+.concept-steps { padding-left: 1.2em; }
+.mission-count { font-weight: 800; color: var(--cyan); }
+.meters { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 8px 0 14px; }
+.meter-head { display: flex; gap: 10px; align-items: baseline; justify-content: space-between; }
+.delta { font-weight: 800; font-size: 0.85rem; }
+.delta.up { color: #fca5a5; } .delta.down { color: #86efac; }
+.situation { background: #07173a; border-left: 5px solid var(--cyan); padding: 10px 14px; border-radius: 8px; }
+.options { display: grid; gap: 10px; margin: 12px 0; }
+.option { display: flex; justify-content: space-between; align-items: center; gap: 10px; text-align: left; font: inherit; color: var(--text); background: var(--card); border: 2px solid var(--line); border-radius: 12px; padding: 12px 14px; cursor: pointer; min-height: 52px; }
+.option:hover:not(:disabled) { border-color: var(--cyan); }
+.option:disabled { cursor: default; }
+.option.chosen { box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.4); }
+.option.fit-good { border-color: var(--ok); background: var(--ok-bg); }
+.option.fit-cond { border-color: var(--warn); background: var(--warn-bg); }
+.option.fit-poor { border-color: var(--ng); background: var(--ng-bg); }
+.fit-tag { font-weight: 800; white-space: nowrap; font-size: 0.88rem; }
+.fit { font-weight: 800; }
+.fit-good { color: #bbf7d0; } .fit-cond { color: #fde68a; } .fit-poor { color: #fecdd3; }
+.option.fit-good .fit-tag { color: #bbf7d0; } .option.fit-cond .fit-tag { color: #fde68a; } .option.fit-poor .fit-tag { color: #fecdd3; }
+.review { padding-left: 1.3em; } .review li { margin: 10px 0; }
+.axis { display: grid; grid-template-columns: 8em 1fr 3em; gap: 10px; align-items: center; }
+.grade { display: inline-flex; align-items: center; gap: 10px; background: var(--card2); border: 2px solid var(--cyan); border-radius: 14px; padding: 4px 18px; margin: 8px 0; }
+.grade-letter { font-size: 2.6rem; font-weight: 900; color: var(--cyan); line-height: 1.2; }
+.mail { border: 1px solid var(--line); border-radius: 12px; background: #f3f7ff; color: #0b1730; overflow: hidden; margin: 10px 0; }
+.mail .muted { color: #46557a; }
+.mail-head { background: #dbe6fb; padding: 10px 14px; border-bottom: 1px solid #b9c9ea; }
+.mail-body { padding: 10px 16px; }
+.fakelink { color: #1d4ed8; text-decoration: underline; }
+.linkreal { display: inline-block; background: #fff4c2; border: 1px solid #d4a800; color: #3b2f00; padding: 0 8px; border-radius: 6px; word-break: break-all; }
+.mail .btn.ghost { color: #0b1730; border-color: #7b8db5; }
+
+/* クリア画面・ダッシュボード */
+.clear { text-align: center; }
+.clear-shield { font-size: 3.2rem; }
+.clear-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 16px 0; }
+.clear-stats > div { background: var(--card2); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; }
+.xp-big { font-size: 2.2rem; color: var(--cyan); line-height: 1.2; }
+.dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 14px; }
+.dash-grid .card { margin: 0; }
+.big-num { font-size: 2.2rem; color: var(--cyan); }
+.stage-prog { list-style: none; padding: 0; }
+.stage-prog li { display: grid; grid-template-columns: 1fr; gap: 2px; margin-bottom: 10px; }
+.ach { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
+.ach li { display: flex; gap: 10px; align-items: flex-start; background: var(--card2); border-radius: 10px; padding: 8px 12px; }
+.ach li.off { opacity: 0.65; }
+.ach li span { font-size: 1.5rem; }
+.switch { display: flex; gap: 8px; align-items: flex-start; margin: 8px 0; }
+.switch input { width: 22px; height: 22px; accent-color: var(--cyan); margin-top: 4px; flex: none; }
+.trial-bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 8px 14px; position: sticky; top: 96px; z-index: 5; }
+.timer { font-size: 1.3rem; font-weight: 800; color: var(--cyan); font-variant-numeric: tabular-nums; }
+.timer.low { color: var(--ng); }
+input[type="text"], select, textarea { width: 100%; font: inherit; color: var(--text); background: #07173a; border: 2px solid var(--line); border-radius: 10px; padding: 9px 12px; margin-top: 4px; }
+label { display: block; }
+label.choice, label.switch { display: flex; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
+.row label { flex: 1; min-width: 14em; }
+table.rank th, table.rank td { white-space: nowrap; }
+.share-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; align-items: start; }
+.cardcanvas { width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--line); display: block; }
+textarea { resize: vertical; }
+
+/* トースト・XP演出（控えめ） */
+.toasts { position: fixed; right: 12px; bottom: 12px; display: grid; gap: 8px; z-index: 50; max-width: min(92vw, 340px); }
+.toast { background: var(--card2); border: 2px solid var(--cyan); border-radius: 12px; padding: 10px 14px; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5); animation: slidein 0.35s ease; }
+.xpfx { position: fixed; left: 50%; top: 28%; transform: translateX(-50%); z-index: 40; pointer-events: none; }
+.xpfloat { color: var(--cyan); font-weight: 900; font-size: 2rem; text-shadow: 0 2px 10px #000; animation: floatup 1.5s ease-out forwards; }
+@keyframes slidein { from { transform: translateY(14px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes floatup { from { transform: translateY(14px); opacity: 0; } 20% { opacity: 1; } to { transform: translateY(-44px); opacity: 0; } }
+
+@media (max-width: 760px) {
+  body { font-size: 16px; }
+  .hero { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 1.8rem; }
+  .share-grid { grid-template-columns: 1fr; }
+  .trial-bar { top: 118px; }
+  .axis { grid-template-columns: 6em 1fr 3em; }
+  .card { padding: 14px; }
+}
+
+.aid { background: #07173a; border: 1px dashed var(--cyan-d); border-radius: 10px; padding: 8px 14px; margin: 8px 0; }
+.linenotes { list-style: none; padding: 0; margin: 8px 0; }
+.linenotes li { margin: 6px 0; padding-left: 4px; }
+.linenotes .ln { display: inline-block; width: auto; color: var(--cyan); font-weight: 800; text-align: left; }
+</style>
+</head>
+<body>
+  <a class="skip" href="#main">本文へスキップ</a>
+  <header class="site-header">
+    <div class="wrap bar-row">
+      <a id="brand" class="brand" href="#/" aria-label="CYBER QUEST JAPAN ホーム"></a>
+      <div id="lvslot"></div>
+    </div>
+    <nav id="nav" class="wrap nav" aria-label="メインメニュー"></nav>
+  </header>
+  <main id="main" class="wrap main" tabindex="-1">
+    <noscript><div class="card"><h1>JavaScriptが必要です</h1><p>このゲームはブラウザ上のJavaScriptで動作します。JavaScriptを有効にしてお試しください。</p></div></noscript>
+  </main>
+  <footer class="site-footer wrap">
+    <p>民間の無料学習プロジェクトです。政府機関・The PHP Group等とは無関係で、公的な認定・認証ではありません。</p>
+    <p>教材はすべて架空のサービス・データで構成され、実在のサイトへの接続や攻撃は行いません。<a href="#/privacy">プライバシーと利用上の注意</a>　<a href="#/facts">事実と出典</a></p>
+  </footer>
+  <div id="live" class="sr-only" role="status" aria-live="polite"></div>
+  <div id="toasts" class="toasts" role="status" aria-live="polite"></div>
+  <div id="xpfx" class="xpfx"></div>
+  <script>(() => {
+const __m = {};
+__m["dom.js"] = (() => {
+/** h('button.btn.primary#id', {onclick}, '文字') の形でDOMを作る */
+function h(sel, props, ...children) {
+    const m = sel.match(/^([a-zA-Z0-9]+)?((?:[.#][\w-]+)*)$/);
+    const tag = (m && m[1]) || 'div';
+    const el = document.createElement(tag);
+    const rest = (m && m[2]) || '';
+    const classes = [];
+    for (const part of rest.match(/[.#][\w-]+/g) || []) {
+        if (part[0] === '.')
+            classes.push(part.slice(1));
+        else
+            el.id = part.slice(1);
+    }
+    if (classes.length)
+        el.className = classes.join(' ');
+    if (props) {
+        for (const [k, v] of Object.entries(props)) {
+            if (v === undefined || v === null || v === false)
+                continue;
+            if (k.startsWith('on') && typeof v === 'function') {
+                el.addEventListener(k.slice(2).toLowerCase(), v);
+            }
+            else if (k === 'class') {
+                el.className = (el.className ? el.className + ' ' : '') + String(v);
+            }
+            else if (k === 'checked' || k === 'disabled' || k === 'open') {
+                el[k] = true;
+            }
+            else if (k === 'style' && typeof v === 'string') {
+                el.style.cssText = v; // CSSOM経由（CSPのstyle-srcでインライン属性を禁止しても動く）
+            }
+            else if (k === 'value') {
+                el.value = String(v);
+            }
+            else {
+                el.setAttribute(k, v === true ? '' : String(v));
+            }
+        }
+    }
+    append(el, children);
+    return el;
+}
+function append(el, children) {
+    for (const c of children) {
+        if (c === null || c === undefined || c === false)
+            continue;
+        if (Array.isArray(c))
+            append(el, c);
+        else if (c instanceof Node)
+            el.appendChild(c);
+        else
+            el.appendChild(document.createTextNode(String(c)));
+    }
+}
+/**
+ * 小さな状態付きコンポーネント。set() で再描画し、data-fk を持つ要素のフォーカスを復元する。
+ */
+function stateful(init, render) {
+    const host = document.createElement('div');
+    host.className = 'sf';
+    let s = init;
+    const set = (p) => {
+        s = { ...s, ...(typeof p === 'function' ? p(s) : p) };
+        paint();
+    };
+    function paint() {
+        const ae = document.activeElement;
+        const key = ae && host.contains(ae) ? ae.getAttribute('data-fk') : null;
+        host.replaceChildren(render(s, set));
+        if (key) {
+            const target = host.querySelector(`[data-fk="${CSS.escape(key)}"]`);
+            target?.focus({ preventScroll: true });
+        }
+    }
+    paint();
+    return host;
+}
+function clear(el) {
+    el.replaceChildren();
+}
+/** 乱数ユーティリティ（Fisher-Yates） */
+function shuffle(arr, rnd = Math.random) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(rnd() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+/** スクリーンリーダー向けの読み上げ領域に通知する */
+function announce(msg) {
+    const el = document.getElementById('live');
+    if (!el)
+        return;
+    el.textContent = '';
+    window.setTimeout(() => {
+        el.textContent = msg;
+    }, 30);
+}
+function fmtDate(iso) {
+    if (!iso)
+        return '—';
+    const d = new Date(iso);
+    if (isNaN(d.getTime()))
+        return '—';
+    return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+function fmtSec(ms) {
+    const s = ms / 1000;
+    if (s < 60)
+        return `${s.toFixed(1)}秒`;
+    const m = Math.floor(s / 60);
+    return `${m}分${Math.round(s - m * 60)}秒`;
+}
+
+return { h, stateful, clear, shuffle, announce, fmtDate, fmtSec };
+})();
+__m["config/game.js"] = (() => {
+const SERVICE = {
+    name: 'CYBER QUEST JAPAN for PHP',
+    catch: '守る力は、知ることから始まる。',
+    sub: 'ニュースで終わらせない。自分の手で、サイバーセキュリティを学ぼう。',
+    /** 共有カードや共有文に入れるURL。公開後に差し替える（未設定時は現在のURL）。 */
+    publicUrl: '',
+    /** 公開時に設定：意見・誤りの報告用フォーム（GoogleフォームのURL）。未設定なら画面に「準備中」と表示 */
+    feedbackUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSegg48c7ZBXSZzhiDVvwXkuk53GDW_3zcnWt9miHW8W1_ON9g/viewform',
+    /** 公開時に設定（任意）：運営のThreadsアカウントURL（告知用・公開リプライ） */
+    threadsUrl: '',
+    disclaimer: '民間の学習用ゲームです。政府機関・PHP Group等とは無関係で、公的な認定・認証ではありません。',
+};
+/** レベル定義：必要な累計XP。名称・値は自由に変更可。 */
+const LEVELS = [
+    { lv: 1, name: 'セキュリティ初心者', xp: 0 },
+    { lv: 2, name: 'Web探検家', xp: 120 },
+    { lv: 3, name: '脆弱性ハンター', xp: 330 },
+    { lv: 4, name: '防御の戦略家', xp: 600 },
+    { lv: 5, name: 'サイバーガーディアン', xp: 800 },
+];
+const POINTS_BY_DIFF = { easy: 10, normal: 15, hard: 20 };
+const XP_BY_DIFF = { easy: 8, normal: 12, hard: 16 };
+/** 解説を読んでの再挑戦（最初に間違えた問題を正解したとき1回だけ）のXP比率 */
+const REVIEW_XP_RATIO = 0.5;
+/** CYBER TRIAL のスコア式（画面にも表示する）
+ *  score = round( (正解した問題の配点合計 + 速度ボーナス合計) × 正答率 )
+ *  速度ボーナス = 配点 × SPEED_BONUS_MAX × max(0, 1 − 回答秒数 / TARGET_SEC)  ※正解した問題だけに付く
+ *  → 不正解は0点で速度ボーナスも付かず、さらに正答率が全体に掛かるので、
+ *    速さを優先して不正解を重ねても得をしない。
+ */
+const TRIAL = {
+    speedBonusMax: 0.5,
+    targetSec: 30,
+    counts: [5, 10, 15],
+    timedSecPerQuestion: 30,
+};
+const ACHIEVEMENTS = [
+    { id: 'tutorial', name: 'チュートリアルを完了', desc: 'STAGE 0 をクリア', icon: '🚪' },
+    { id: 'firstReview', name: '初めてのコードレビュー成功', desc: 'コードレビュー問題に初めて正解', icon: '🔍' },
+    { id: 'noMiss', name: 'ノーミスクリア', desc: 'いずれかのステージを1度も間違えずにクリア', icon: '🎯' },
+    { id: 'allClear', name: '全ステージをクリア', desc: 'STAGE 0〜6 をすべてクリア', icon: '🏁' },
+    { id: 'finalS', name: '総合ミッションSランク', desc: 'STAGE 6 の評価でSランク', icon: '🛡️' },
+    { id: 'trialFirst', name: 'CYBER TRIAL 初挑戦', desc: 'CYBER TRIAL を最後まで完走', icon: '⏱️' },
+    { id: 'trialPerfect', name: 'パーフェクトトライアル', desc: '10問以上のTRIALで正答率100%', icon: '💎' },
+    { id: 'personalBest', name: '自己ベスト更新', desc: '同じ条件のTRIALで自己ベストを更新（このブラウザ内の記録）', icon: '📈' },
+];
+function levelFor(xp) {
+    let cur = LEVELS[0];
+    for (const l of LEVELS)
+        if (xp >= l.xp)
+            cur = l;
+    const next = LEVELS.find((l) => l.xp > cur.xp);
+    return { ...cur, next, progress: next ? (xp - cur.xp) / (next.xp - cur.xp) : 1 };
+}
+/** 称号（レベル名と別に、条件を満たすと名乗れるもの） */
+function titlesFor(unlocked) {
+    const t = [];
+    if (unlocked.includes('allClear'))
+        t.push('ステージ踏破者');
+    if (unlocked.includes('finalS'))
+        t.push('総合ミッションS');
+    if (unlocked.includes('trialPerfect'))
+        t.push('TRIALパーフェクト');
+    return t;
+}
+
+return { SERVICE, LEVELS, POINTS_BY_DIFF, XP_BY_DIFF, REVIEW_XP_RATIO, TRIAL, ACHIEVEMENTS, levelFor, titlesFor };
+})();
+__m["content/facts.js"] = (() => {
+const FACTS_CHECKED = '2026-10-23';
+const S = {
+    jpcert: {
+        label: 'JPCERT-AT-2026-0033 PHPにおける複数の脆弱性（CVE-2026-109618、CVE-2026-109619）に関する注意喚起',
+        publisher: 'JPCERT/CC',
+        url: 'https://www.jpcert.or.jp/at/2026/at260033.html',
+        published: '2026-10-22',
+        checked: FACTS_CHECKED,
+    },
+    ipaPre: {
+        label: '【事前準備のお願い】PHPのセキュリティリリース公開予定について',
+        publisher: 'IPA（情報処理推進機構）',
+        url: 'https://www.ipa.go.jp/security/security-alert/2026/pre-alert20261021.html',
+        published: '2026-10-21',
+        checked: FACTS_CHECKED,
+    },
+    ipaAlert: {
+        label: 'PHPの脆弱性対策について(CVE-2026-109618、CVE-2026-109619：PHP2shell)',
+        publisher: 'IPA（情報処理推進機構）',
+        url: 'https://www.ipa.go.jp/security/security-alert/2026/alert20261022.html',
+        published: '2026-10-22',
+        checked: FACTS_CHECKED,
+        note: '2026-10-23に本文を確認（影響バージョン・修正版・推奨対策・暫定措置の記載）。悪用確認の記載はなし。調査に関与したWiz社の見解として「PHP 5.4以降」にも言及。',
+    },
+    rapid7: {
+        label: 'CVE-2026-109618 and CVE-2026-109619: Critical Unauthenticated Remote Code Execution in PHP',
+        publisher: 'Rapid7',
+        url: 'https://www.rapid7.com/blog/post/etr-cve-2026-109618-and-cve-2026-109619-critical-unauthenticated-remote-code-execution-in-php/',
+        published: '2026-10-21',
+        checked: FACTS_CHECKED,
+        note: '2026-10-22 更新版を確認。',
+    },
+    unit42: {
+        label: 'Threat Brief: Critical Vulnerabilities in PHP: CVE-2026-109618, CVE-2026-109619',
+        publisher: 'Palo Alto Networks Unit 42',
+        url: 'https://unit42.paloaltonetworks.com/cve-2026-109618-cve-2026-109619/',
+        published: '2026-10-21',
+        checked: FACTS_CHECKED,
+    },
+    redhat: {
+        label: 'CVE-2026-109618 - Red Hat Customer Portal',
+        publisher: 'Red Hat',
+        url: 'https://access.redhat.com/security/cve/cve-2026-109618',
+        published: '2026-10-22',
+        checked: FACTS_CHECKED,
+        note: 'ページに発表日の記載がなく、日付は確認日ベースの暫定値。',
+    },
+    piyolog: {
+        label: 'PHPの2件の深刻な脆弱性(CVE-2026-109618、CVE-2026-109619)についてまとめてみた',
+        publisher: 'piyolog（個人ブログによる情報集約）',
+        url: 'https://piyolog.hatenadiary.jp/entry/2026/10/21/174516',
+        published: '2026-10-21',
+        checked: FACTS_CHECKED,
+        note: '随時更新される集約記事。各主体の発表の原文確認が別途必要。',
+    },
+    phpAdvisory: {
+        label: 'PHP Group セキュリティアドバイザリ（GHSA-w8hw-w9fx-j79w / GHSA-6wmf-4rv5-p3rp、php.net 2026-10-21）',
+        publisher: 'The PHP Group',
+        url: 'https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w',
+        published: '2026-10-21',
+        checked: FACTS_CHECKED,
+        note: 'JPCERT/CC等が参照元として挙げているが、このセッションでは原文を取得できなかった。公開前に必ず原文を確認すること。',
+    },
+};
+const SOURCES = S;
+const FACTS = [
+    {
+        id: 'event',
+        title: '何が起きたか：PHPのセキュリティリリースと勧告の公表',
+        body: 'The PHP Group は2026年10月21日、PHP本体の2件の脆弱性についてセキュリティアドバイザリと修正版を公表した。IPAは公表の前日までに「公開予定は日本時間10月21日23:00」と事前準備（PHP利用の棚卸し等）を呼びかけ、JPCERT/CCは10月22日に注意喚起を出している。',
+        status: 'confirmed',
+        sources: [S.ipaPre, S.jpcert, S.phpAdvisory],
+        caveat: 'PHP Group・CVEレコード・CISAの原文は直接取得できていない（JPCERT/CC・IPAの記載で確認）。',
+    },
+    {
+        id: 'ids',
+        title: '2つの識別番号（CVE）の意味',
+        body: 'CVE-2026-109618 と CVE-2026-109619 は、公開された2件の脆弱性を区別するための共通番号。公開情報では、前者は「メモリ不足（OOM）時の処理の途中終了で、後片付けが不整合な状態を扱いメモリが壊れる」問題、後者は「リクエスト間で残った古い状態が解放済みメモリを指し、後続のリクエストで使われる（解放後使用）」問題と説明されている。',
+        status: 'secondary',
+        sources: [S.rapid7, S.unit42, S.redhat, S.piyolog],
+        caveat: 'PHP公式アドバイザリ原文は直接取得できていない。技術的な表現は二次情報の要約に基づくため、原文との照合が必要。',
+    },
+    {
+        id: 'cause',
+        title: '原因はどこにあるか：PHP本体（処理系）の実装',
+        body: '公開情報が示す原因は、PHPの実行処理系（php-src）におけるメモリ不足時・致命的エラー時の処理の不備。PHPという言語の文法や設計方針の問題でも、各サイトのアプリケーションコード（SQL文の組み立てなど）の書き方の問題でもない。そのため、アプリ側のコードを直すだけでは根本対策にならず、PHP本体の更新が必要になる。',
+        status: 'secondary',
+        sources: [S.rapid7, S.redhat, S.jpcert],
+        caveat: '「アプリのコードの書き方では防げない」旨はJPCERT/CC注意喚起が更新を最重要対策としている点からの整理。環境や設定によって悪用のしやすさは変わる。',
+    },
+    {
+        id: 'impact',
+        title: '悪用された場合に「起こり得る」こと（想定）',
+        body: '悪用された場合、PHPの実行プロセスの権限で任意のコードを実行される可能性がある（JPCERT/CC）。Rapid7・Red Hatは、認証なしの第三者がネットワーク経由で到達し得る（リモートコード実行）と説明している。ただし「起こり得る」ことと「実際に起きた被害」は別であり、後者は下の「被害の実態」を参照。',
+        status: 'confirmed',
+        sources: [S.jpcert, S.rapid7, S.redhat],
+        caveat: '「認証不要」の部分は民間事業者（Rapid7・Red Hat）の記述。悪用には環境・設定ごとの前提条件があるとも説明されている。',
+    },
+    {
+        id: 'versions',
+        title: '影響を受けるバージョンと修正版（2026-10-23時点）',
+        body: 'PHP 8.2系は8.2.35未満、8.3系は8.3.36未満、8.4系は8.4.27未満、8.5系は8.5.12未満が影響を受け、それぞれ 8.2.35 / 8.3.36 / 8.4.27 / 8.5.12 で修正された。PHP 8.1以前には通常の修正版は提供されず、7.4・8.0・8.1には最小限の緩和策が提供された。サポートされているバージョンへの移行が推奨される。',
+        status: 'confirmed',
+        sources: [S.jpcert],
+        caveat: '公式情報は更新され得る。公開前に必ず最新のアドバイザリを確認すること。Linuxディストリビューション等のパッケージは、修正が両方含まれているか提供元の情報で確認する。',
+    },
+    {
+        id: 'versionsWide',
+        title: '「PHP 5.4以降のほぼ全バージョンが影響」という主張',
+        body: 'セキュリティ事業者Wizが、PHP 5.4以降の広い範囲が少なくとも1件の影響を受けると述べたと報じられている。',
+        status: 'unconfirmed',
+        sources: [S.piyolog],
+        caveat: '公的機関の公表では確認できていない。教材ではこの主張を事実として扱わない。',
+    },
+    {
+        id: 'severity',
+        title: '深刻度（CVSS）は評価者によって違う',
+        body: '2件とも、CNA（PHP）はCVSS v4.0で9.2（Critical）。NVDはCVSS v3.1で9.8、Red HatはCVSS v3.1で8.1（Important）と評価したと報じられている。攻撃の難しさの見立てが評価者によって異なるため、数値が違う。',
+        status: 'secondary',
+        sources: [S.rapid7, S.redhat, S.piyolog],
+        caveat: 'スコアは「悪用されやすさ」と「悪用後の影響」を数値化した目安で、実際の被害の大きさそのものではない。',
+    },
+    {
+        id: 'runtime',
+        title: '実行方式によって危険度が違う',
+        body: 'Rapid7は、Apacheのmod_phpがもっとも高リスクで、PHP-FPMでは悪用に追加の前提条件があると説明している。Red Hatも、標準的なRHEL環境ではPHP-FPMが主で、実際のコード実行は難しく通常は非既定の挙動が必要と評価している。ただし「FPMなら安全」という意味ではなく、どちらも更新が必要。',
+        status: 'secondary',
+        sources: [S.rapid7, S.redhat],
+        caveat: '環境ごとの悪用可否は未検証の範囲が残るとされる。自分の環境の実行方式を実際に確認することが先。',
+    },
+    {
+        id: 'exploit',
+        title: '攻撃は観測されたか（2026-10-22時点の報告）',
+        body: 'IPAの10月21日の事前告知は「悪用した攻撃を確認しているわけではない」としていた。公表後は、Amazon・Patchstack・Cloudflare・Hadrianなどの民間事業者が攻撃の試行や悪用を観測したと報告したとされる一方、CISAは注意喚起時点で未観測、Huntressも自社のパートナー環境では未観測と報じられている。Rapid7は「悪用は観測していないが複数の試行を確認」と書いている。JPCERT/CC注意喚起には観測件数や具体事例の記載はない。',
+        status: 'secondary',
+        sources: [S.ipaPre, S.rapid7, S.unit42, S.piyolog, S.jpcert],
+        caveat: '観測主体・時点によって記載が異なる。「試行があった」ことと「侵害が成功した」ことは別で、成功件数・被害の全体像は未確認。',
+    },
+    {
+        id: 'exposure',
+        title: '影響を受け得るサーバーの規模',
+        body: 'Palo Alto NetworksのCortex Xpanseは、公開時点で2,260万件超の「両脆弱性の影響を受け得る」インスタンスを観測したと報告している。',
+        status: 'secondary',
+        sources: [S.unit42],
+        caveat: '同社のテレメトリに基づく推定で、実際に侵害可能な数や被害数ではない。',
+    },
+    {
+        id: 'mitigation',
+        title: '対策：更新が最優先。設定変更は暫定措置',
+        body: '最も重要な対策は修正済みバージョンへの速やかな更新（十分なテストのうえで）。すぐ更新できない場合の緩和策は特定の攻撃経路にしか効かず、根本解決にならない（JPCERT/CC）。Rapid7は暫定措置の例として、セッションのアップロード進捗機能の無効化、リクエストサイズ上限の見直し、メモリ上限設定の管理者側での固定などを挙げ、いずれも更新の代わりにならないとしている。',
+        status: 'confirmed',
+        sources: [S.jpcert, S.rapid7],
+        caveat: '具体的な設定値は環境依存で、誤った設定は障害の原因にもなる。必ず最新の公式情報と自環境の検証に基づくこと。',
+    },
+    {
+        id: 'suspend',
+        title: 'なぜサービスを一時停止した組織があったのか',
+        body: '予防的措置として一時停止・緊急メンテナンスを行った例が報じられている（欧州の政府機関の例：Unit 42、国内では同ブログの集計で211組織：10月22日1時台まで）。停止の目的は、修正版の適用や点検が終わるまで、攻撃を受け得る入口を閉じておくことと考えられるが、個々の組織の判断理由は各組織の発表で確認が必要。',
+        status: 'secondary',
+        sources: [S.unit42, S.piyolog],
+        caveat: '「停止＝侵害された」ではない。各組織が公式に述べた停止理由は一律には確認できていない（未確認）。',
+    },
+    {
+        id: 'afterpatch',
+        title: '修正後に確認すべきこと（痕跡の確認）',
+        body: 'JPCERT/CC注意喚起は、(1)異常に長い・異常な形式のPHPSESSID Cookie、(2)不審なmultipart/form-dataリクエスト、(3)その前後のメモリ上限関連エラーやHTTP 500、(4)PHPワーカーの異常終了・頻繁な再起動、(5)不審なプロセス実行・外部通信・ファイル作成の有無を確認するよう求めている。痕跡が見つからなくても、攻撃を受けていないとは断定できない。',
+        status: 'confirmed',
+        sources: [S.jpcert],
+    },
+    {
+        id: 'rollout',
+        title: '全サイトへの修正適用は完了したか',
+        body: '修正版が公開されたことと、世の中のすべてのサイトに適用が完了したことは別。完了状況を示す公的な集計は確認できていない。',
+        status: 'unconfirmed',
+        sources: [S.piyolog],
+        caveat: 'ホスティング各社が順次更新・案内を出している旨が報じられている。全体の適用率は未確認。',
+    },
+    {
+        id: 'damage',
+        title: '実際の被害（侵害された件数・内容）',
+        body: '侵害が成功した件数、情報漏えいの有無などの実被害の全体像は、確認できる公的な集計がない。',
+        status: 'unconfirmed',
+        sources: [S.jpcert, S.ipaAlert],
+        caveat: 'IPA 10月22日注意喚起の本文には、悪用確認や被害件数の記載はない。国内では事業者が不正アクセスを公表した例（原因のCVE番号は特定されていない）もあるが、全体像は未確認。',
+    },
+];
+const FACT_MAP = Object.fromEntries(FACTS.map((f) => [f.id, f]));
+/** 公開前チェック用：未確認・要原文確認の項目一覧 */
+const PRE_RELEASE_CHECKLIST = [
+    'The PHP Group の公式アドバイザリ（php.net／GHSA-w8hw-w9fx-j79w・GHSA-6wmf-4rv5-p3rp）の原文で、原因・影響範囲・修正版を再確認する（今回は原文を取得できていない）',
+    'CVE公式レコード（cve.org）の記載（説明文・CVSS・発表日）を確認する',
+    '（確認済み 2026-10-23）IPA 2026-10-22 注意喚起の本文：推奨対策・暫定措置（アクセス制限・遮断・一時停止の要否判断）を反映済み。更新があれば再確認',
+    'CISA（KEV登録の有無）・国家サイバー統括室の注意喚起の最新状況を確認する',
+    '影響バージョン・修正版（8.2.35 / 8.3.36 / 8.4.27 / 8.5.12）が更新されていないか確認する',
+    '攻撃観測の状況（試行・成功・被害件数）は日々変わるため、公開日に再確認して exploit / damage を更新する',
+    '「PHP 5.4以降が影響」等の未確認主張が公的に確認されたか、再確認する',
+];
+
+return { FACTS_CHECKED, SOURCES, FACTS, FACT_MAP, PRE_RELEASE_CHECKLIST };
+})();
+__m["content/stages.js"] = (() => {
+const { FACTS_CHECKED } = __m["content/facts.js"];
+const STAGES = [
+    {
+        id: 's0', no: 0, title: 'あなたはWebの仕組みを知っているか？', subtitle: 'チュートリアル', difficulty: '入門', minutes: 8, clearBonus: 30,
+        intro: '見えているページの“裏側”では、何が起きている？まずはWebの基本から。',
+        goals: ['ブラウザとサーバーの違いが説明できる', 'リクエストとレスポンスの流れが分かる', 'なぜ“目に見えない裏側”の安全性が大切かが分かる'],
+        meta: { status: '一般知識（時事に依存しない）', sources: [], lastChecked: FACTS_CHECKED },
+        steps: [
+            { kind: 'read', title: 'Webサイトは「頼む」と「答える」でできている', blocks: [
+                    { t: 'p', text: 'Webサイトを見るとき、あなたのスマホやパソコンの“ブラウザ”が、遠くにある“サーバー”へ「このページをください」と頼んでいます。これを「リクエスト」と呼びます。' },
+                    { t: 'p', text: 'サーバーはそれを受け取って処理し、結果を「レスポンス」として返します。私たちが見ているのは、その結果です。' },
+                    { t: 'table', head: ['言葉', '意味'], rows: [['ブラウザ（クライアント）', 'あなたの端末で動き、リクエストを送って結果を表示する'], ['サーバー', 'リクエストを受けて処理し、レスポンスを返す側'], ['フロントエンド', '画面側（HTML・CSS・JavaScript）'], ['バックエンド', 'サーバー側の処理（注文・認証・データ保存など）']] },
+                ] },
+            { kind: 'activity', id: 'flow0', title: '体験：ミライ通販にアクセスしてみよう', xp: 10 },
+            { kind: 'read', title: 'なぜ“裏側”が大切なの？', blocks: [
+                    { t: 'p', text: 'リクエストの内容は、利用者（や攻撃者）が自由に作れます。サーバー側の処理が想定外のリクエストに耐えられないと、画面には何も表示されなくても、情報が漏れたり、サービスが止まったりする恐れがあります。' },
+                    { t: 'note', tone: 'info', text: 'この教材の演習は、すべて架空のサービス・架空のデータです。実在のサイトへの接続や攻撃は一切行いません。' },
+                ] },
+            { kind: 'quiz', title: '確認クイズ', qids: ['w1', 'w2', 'w3', 'w4', 'w5'] },
+        ],
+    },
+    {
+        id: 's1', no: 1, title: 'PHPとは何か？', subtitle: 'サーバーで動く言語', difficulty: '入門', minutes: 10, clearBonus: 30,
+        intro: '世界中のWebサイトの裏側で動くPHP。何をする言語で、どこで動くのかを見てみよう。',
+        goals: ['PHPがサーバー側で実行されることが分かる', 'HTML・CSS・JavaScript・PHPの役割の違いが分かる', 'バージョン更新の意味が分かる'],
+        meta: { status: '一般知識（時事に依存しない）', sources: ['versions'], lastChecked: FACTS_CHECKED },
+        steps: [
+            { kind: 'read', title: 'PHPはサーバーの中で動く', blocks: [
+                    { t: 'p', text: 'PHPは、Webサーバー側で動くプログラミング言語です。リクエストを受け取り、データベースを調べて、HTMLを組み立てて返す、といった処理が得意です。WordPressなど、多くのWebサービスがPHPを使っています。' },
+                    { t: 'table', head: ['名前', '主な役割', '動く場所'], rows: [['HTML', 'ページの構造・内容', 'ブラウザが読む'], ['CSS', '見た目（色・余白・配置）', 'ブラウザが読む'], ['JavaScript', 'ブラウザ上の動き', '主にブラウザ'], ['PHP', 'サーバー側の処理・HTMLの生成', 'サーバー']] },
+                ] },
+            { kind: 'activity', id: 'code1', title: '体験：さくら動画のコードを読んでみよう', xp: 10 },
+            { kind: 'read', title: 'バージョンとアップデートの意味', blocks: [
+                    { t: 'p', text: 'PHPには「8.4」「8.5」のように系統（ブランチ）があり、その中に「8.4.27」のように細かい版が続きます。更新には、不具合の修正やセキュリティ修正が含まれます。' },
+                    { t: 'ul', items: ['サポートされている版は、修正が提供される', 'サポートが終了した版（EOL）は、新しい脆弱性が見つかっても修正されない可能性がある', '更新しても、動作確認や監視は必要（更新しただけで安心しない）'] },
+                    { t: 'note', tone: 'info', text: 'WebサーバーとPHPを連携させる方法には「mod_php」「PHP-FPM」などがあります。次のステージで、実行方式による違いにも触れます。' },
+                ] },
+            { kind: 'quiz', title: '確認クイズ', qids: ['p1', 'p2', 'p3', 'p5', 'p7'] },
+        ],
+    },
+    {
+        id: 's2', no: 2, title: '今回のPHP問題で何が起きたのか？', subtitle: '2026年10月21日の公表', difficulty: '初級', minutes: 15, clearBonus: 40,
+        intro: '2026年10月21日、PHP本体の重大な脆弱性が公表されました。確認できた事実と、まだ分からないことを分けて読み解きます。',
+        goals: ['何が起きたかを、出典のある事実で説明できる', '“起こり得る被害”と“実際の被害”を区別できる', '脆弱性・CVE・リモートコード実行の意味が分かる'],
+        meta: { status: '一部未確認', sources: ['event', 'ids', 'cause', 'impact', 'versions', 'exploit', 'mitigation', 'suspend'], lastChecked: FACTS_CHECKED },
+        steps: [
+            { kind: 'read', title: '用語を知ろう：脆弱性・CVE・リモートコード実行', blocks: [
+                    { t: 'ul', items: ['脆弱性：ソフトウェアの欠陥のうち、悪用されると安全性を損なう可能性があるもの', 'CVE：公開された脆弱性を区別するための共通の識別番号（深刻度の点数ではない）', 'リモートコード実行（RCE）：ネットワーク越しに、サーバー上で意図しない処理を実行されてしまう可能性', 'CVSS：深刻度を数値化した目安（評価者や版によって数値が違うことがある）'] },
+                    { t: 'note', tone: 'warn', text: '「脆弱性がある」「攻撃が試された」「攻撃が成功した」「被害が出た」は、すべて別の段階です。ニュースを読むときは、どの段階の話かを分けましょう。' },
+                ] },
+            { kind: 'read', title: '確認できたこと（出典つき）', blocks: [
+                    { t: 'note', tone: 'fact', text: '以下の事実カードは、公的機関の公表で確認できたものと、二次情報・未確認のものを区別して表示しています。出典と確認日を必ず見てください。' },
+                    { t: 'fact', id: 'event' }, { t: 'fact', id: 'ids' }, { t: 'fact', id: 'cause' },
+                ] },
+            { kind: 'activity', id: 'mission2', title: 'ミッション：ミライ通販のサーバーの安全性を確認せよ', xp: 15 },
+            { kind: 'quiz', title: 'ミッション確認：何が・どんな被害・何を確認・何を優先', qids: ['b2', 'b5', 'b6', 'f5', 'f1', 'f14', 'f7', 'f15'] },
+        ],
+    },
+    {
+        id: 's3', no: 3, title: '脆弱性を見抜け！安全な実践演習', subtitle: 'コードレビュー（架空コード）', difficulty: '初級〜中級', minutes: 15, clearBonus: 40,
+        intro: '意図的に問題を含ませた短いコードを読み、問題の行と安全な修正を選ぼう。すべて教材専用の架空データです。',
+        goals: ['入力値の検証・SQLインジェクション・XSSの基本が分かる', '認証と認可、最小権限の違いが分かる', '今回のPHPの問題と、一般的なWebアプリの脆弱性が別物だと説明できる'],
+        meta: { status: '一般知識（時事に依存しない）', sources: ['cause'], lastChecked: FACTS_CHECKED },
+        steps: [
+            { kind: 'read', title: '安全なコードの基本の考え方', blocks: [
+                    { t: 'ul', items: ['入力値は信用しない（サーバー側で型・範囲・形式を検証する）', '値はSQLに連結せず、プレースホルダで別に渡す', 'HTMLに出すときは、出力先に合わせてエスケープする', '「誰か」（認証）と「その操作を許可されているか」（認可）は別。データ単位の権限確認も必要', '権限は最小限にする（最小権限の原則）', 'ログを残し、監視する（早期発見・事後調査のため）'] },
+                    { t: 'note', tone: 'warn', text: '今回のPHPの脆弱性は、これらのコードの書き方の問題とは別です。今回はPHP本体（処理系）の問題で、対処はPHP本体の更新です。一方、ここで学ぶ脆弱性は、アプリのコードで防ぐものです。どちらも大切ですが、混同しないようにしましょう。' },
+                ] },
+            { kind: 'read', title: 'コードを読む前に：これだけ知っていればOK', blocks: [
+                    { t: 'note', tone: 'info', text: 'プログラミング未経験でも大丈夫です。この演習は「コードを書く」のではなく、「どの行が怪しそうか」を見つけるゲームです。問題画面の「🔰 コードの読み方ヒント」で、1行ずつの意味と、注目するポイントを確認できます。' },
+                    { t: 'table', head: ['見かけるもの', '意味（ざっくり）'], rows: [['$名前（例：$qty）', '値を入れておく「箱」（変数）。$ マークが目印'], ['$_POST[\'x\'] / $_GET[\'x\']', '利用者がフォームやURLで送ってきた値。誰でも自由に書き換えられる＝信用してはいけない入力'], ['echo', '画面に出す命令'], ['「.」（ドット）', '文字と文字をつなげる記号'], ['// で始まる行', '人が読むメモ（実行されない）'], ['if ( … ) { … }', '「もし…なら、…する」']] },
+                    { t: 'p', text: 'まず探すのは、「利用者が自由に送れる値」が、確認されないまま使われている行です。多くの脆弱性は、ここから始まります。' },
+                ] },
+            { kind: 'quiz', title: 'コードレビュー演習', qids: ['c1', 'c2', 'c3', 'c4', 'c5', 's5'] },
+        ],
+    },
+    {
+        id: 's4', no: 4, title: '修正パッチと緊急対応', subtitle: '運用責任者になる', difficulty: '初級〜中級', minutes: 15, clearBonus: 40,
+        intro: 'あなたは架空の通販サイトの運用責任者。状況に応じた判断で、リスクとサービスへの影響のバランスを取ろう。',
+        goals: ['パッチ適用の流れ（確認・バックアップ・テスト・適用・確認）が説明できる', '暫定措置と一時停止の位置づけが分かる', '状況に応じて判断が変わることを理解する'],
+        meta: { status: '一部未確認', sources: ['versions', 'mitigation', 'suspend', 'afterpatch'], lastChecked: FACTS_CHECKED },
+        steps: [
+            { kind: 'read', title: 'セキュリティパッチと緊急対応', blocks: [
+                    { t: 'p', text: '脆弱性が公表されたら、基本は「把握 → 更新（または提供元の修正版）→ 確認」です。ただし実際の現場には、更新で止まるリスク、人手の不足、依存関係など、さまざまな事情があります。' },
+                    { t: 'fact', id: 'mitigation' },
+                    { t: 'note', tone: 'info', text: '次の演習には「この選択だけが唯一の正解」とは限らない場面があります。「適切」「条件付きで有効」「不適切」の3段階で評価し、その理由を読んでください。' },
+                ] },
+            { kind: 'activity', id: 'ops4', title: '緊急対応シミュレーション：ミライ通販', xp: 8 },
+            { kind: 'quiz', title: '確認クイズ', qids: ['pa2', 'pa3', 'pa7', 'pa8'] },
+        ],
+    },
+    {
+        id: 's5', no: 5, title: '一般利用者にもできるセキュリティ対策', subtitle: 'フィッシングを見抜く', difficulty: '入門', minutes: 12, clearBonus: 30,
+        intro: '開発者でなくてもできる対策がたくさんあります。「そらメール」に届いたメールを分類してみよう。',
+        goals: ['差出人・リンク先・文面・要求内容など、複数の観点で判断できる', 'パスワードの使い回しの危険と多要素認証の意味が分かる', '公式情報を自分で確認する習慣が身につく'],
+        meta: { status: '一般知識（時事に依存しない）', sources: [], lastChecked: FACTS_CHECKED },
+        steps: [
+            { kind: 'read', title: '見た目や差出人名だけで決めない', blocks: [
+                    { t: 'ul', items: ['差出人名は偽装できる。アドレスのドメインを見る', 'リンクの表示と、実際のリンク先は違うことがある', '急がせる・不安を煽る・個人情報の入力を求める、は要注意', '迷ったら、メールのリンクではなく、公式アプリ・ブックマークから確認する', 'パスワードの使い回しをしない（パスワードマネージャーが便利）', '多要素認証を使う。端末・アプリは更新しておく'] },
+                    { t: 'note', tone: 'warn', text: '話題になった事件（今回のPHPの脆弱性など）は、詐欺メールの口実に使われやすい。「今すぐ更新・ログインを」といった連絡は、自分で公式発表を確認してから。' },
+                ] },
+            { kind: 'activity', id: 'mail5', title: '体験：そらメールの6通を仕分けよう', xp: 8 },
+            { kind: 'quiz', title: '確認クイズ', qids: ['ph1', 'ph3', 'ph4', 'ph6'] },
+        ],
+    },
+    {
+        id: 's6', no: 6, title: '総合ミッション：Webサービスを守れ！', subtitle: 'セキュリティ担当になる', difficulty: '中級', minutes: 20, clearBonus: 60,
+        intro: 'STAGE 0〜5 の総まとめ。情報を集め、優先順位を決め、利用者に説明するまでをやり遂げよう。',
+        goals: ['事実の確認・優先順位・対応の順序・説明責任をそろえて判断できる'],
+        meta: { status: '一部未確認', sources: ['event', 'versions', 'exploit', 'afterpatch', 'mitigation'], lastChecked: FACTS_CHECKED },
+        steps: [
+            { kind: 'read', title: 'ミッション概要', blocks: [
+                    { t: 'p', text: '架空のWebサービス「ミライ通販」で、次の問題が同時に起きています。' },
+                    { t: 'ul', items: ['重大な脆弱性に関する注意喚起', 'システムのバージョンが不明', '不審なアクセスの通知', '修正作業によるサービス停止の懸念', '利用者・社内への説明が必要'] },
+                    { t: 'note', tone: 'info', text: '最終評価は、正解数だけでなく「リスクの判断」「情報確認」「対応の順序」「説明責任」の4観点で行います。' },
+                ] },
+            { kind: 'activity', id: 'final6', title: '総合ミッション', xp: 10 },
+            { kind: 'quiz', title: '仕上げクイズ', qids: ['i1', 'i4', 'i5'] },
+        ],
+    },
+];
+const STAGE_MAP = Object.fromEntries(STAGES.map((s) => [s.id, s]));
+
+return { STAGES, STAGE_MAP };
+})();
+__m["content/types.js"] = (() => {
+// コンテンツ（問題・事実・教材）の型定義。コード本体から分離して管理する。
+const CAT_LABEL = {
+    web: 'Webの仕組み',
+    php: 'PHPの基礎',
+    vulnFact: '今回の脆弱性に関する事実',
+    vulnBasic: '脆弱性の基礎',
+    secureCode: '安全なコードの考え方',
+    patch: 'パッチ適用と緊急対応',
+    phishing: 'フィッシング対策',
+    incident: 'インシデント対応の判断',
+};
+const DIFF_LABEL = { easy: 'やさしい', normal: 'ふつう', hard: 'むずかしい' };
+const FACT_STATUS_LABEL = {
+    confirmed: '公的機関の公表で確認',
+    secondary: '二次情報（要・原文確認）',
+    unconfirmed: '未確認',
+};
+
+return { CAT_LABEL, DIFF_LABEL, FACT_STATUS_LABEL };
+})();
+__m["state/store.js"] = (() => {
+// 進捗の保存（localStorage）。サーバーへは何も送らない。
+const { ACHIEVEMENTS, REVIEW_XP_RATIO, levelFor } = __m["config/game.js"];
+const { STAGES } = __m["content/stages.js"];
+const KEY = 'cqj-php-progress-v1';
+const fresh = () => ({
+    v: 1, xp: 0, stages: {}, answered: {}, stats: { correct: 0, total: 0, byCat: {} },
+    achievements: {}, nick: '', resume: {}, trials: [], settings: { reduceMotion: false },
+});
+function read() {
+    try {
+        const raw = localStorage.getItem(KEY);
+        if (!raw)
+            return fresh();
+        const p = JSON.parse(raw);
+        if (p && p.v === 1)
+            return { ...fresh(), ...p, settings: { ...fresh().settings, ...(p.settings || {}) } };
+    }
+    catch {
+        /* 壊れたデータ・使用不可のストレージは初期状態で続行 */
+    }
+    return fresh();
+}
+let state = read();
+let storageOk = true;
+const listeners = new Set();
+const toasts = { push: () => undefined };
+const xpFx = { push: () => undefined };
+function persist() {
+    try {
+        localStorage.setItem(KEY, JSON.stringify(state));
+        storageOk = true;
+    }
+    catch {
+        storageOk = false;
+    }
+    listeners.forEach((f) => f());
+}
+const getState = () => state;
+const isStorageOk = () => storageOk;
+const subscribe = (f) => {
+    listeners.add(f);
+    return () => listeners.delete(f);
+};
+function touch() {
+    state.lastStudy = new Date().toISOString();
+}
+function addXp(n) {
+    if (n <= 0)
+        return;
+    const before = levelFor(state.xp).lv;
+    state.xp += n;
+    xpFx.push(n);
+    const after = levelFor(state.xp);
+    if (after.lv > before)
+        toasts.push(`レベルアップ！ Lv.${after.lv}`, after.name);
+}
+function unlock(id) {
+    if (state.achievements[id])
+        return;
+    state.achievements[id] = new Date().toISOString();
+    const def = ACHIEVEMENTS.find((a) => a.id === id);
+    if (def)
+        toasts.push(`${def.icon} 実績解除：${def.name}`, def.desc);
+}
+/**
+ * 回答の記録とXP付与。
+ * - 初回正解：満額
+ * - 先に間違え、解説を読んで再挑戦して正解：1回だけ半額（REVIEW_XP_RATIO）
+ * - すでにXPを獲得した問題の反復：0（XPの無制限な水増しを防ぐ）
+ */
+function recordAnswer(id, correct, cat, fullXp) {
+    const rec = state.answered[id] || { attempts: 0, awarded: false, wrong: 0, xp: 0 };
+    rec.attempts += 1;
+    let gain = 0;
+    if (correct && !rec.awarded) {
+        gain = rec.wrong > 0 ? Math.max(1, Math.round(fullXp * REVIEW_XP_RATIO)) : fullXp;
+        rec.awarded = true;
+        rec.xp = gain;
+    }
+    if (!correct)
+        rec.wrong += 1;
+    state.answered[id] = rec;
+    if (cat) {
+        state.stats.total += 1;
+        if (correct)
+            state.stats.correct += 1;
+        const c = state.stats.byCat[cat] || [0, 0];
+        c[1] += 1;
+        if (correct)
+            c[0] += 1;
+        state.stats.byCat[cat] = c;
+    }
+    touch();
+    addXp(gain);
+    persist();
+    return gain;
+}
+/** XPを付けずに正答率の統計だけ記録する（CYBER TRIAL用：XPの水増しを避ける） */
+function recordStat(cat, correct) {
+    state.stats.total += 1;
+    if (correct)
+        state.stats.correct += 1;
+    const c = state.stats.byCat[cat] || [0, 0];
+    c[1] += 1;
+    if (correct)
+        c[0] += 1;
+    state.stats.byCat[cat] = c;
+    touch();
+    persist();
+}
+function recordCodeReviewSuccess() {
+    unlock('firstReview');
+    persist();
+}
+const getResume = (id) => state.resume?.[id] ?? 0;
+function setResume(id, step) {
+    state.resume = { ...(state.resume || {}), [id]: step };
+    persist();
+}
+function setLastStage(id) {
+    state.lastStage = id;
+    touch();
+    persist();
+}
+function clearStage(stageId, opts) {
+    const rec = state.stages[stageId] || { cleared: false, perfect: false, bestAccuracy: 0, runs: 0 };
+    const first = !rec.cleared;
+    rec.cleared = true;
+    rec.runs += 1;
+    rec.clearedAt = new Date().toISOString();
+    rec.bestAccuracy = Math.max(rec.bestAccuracy, opts.accuracy);
+    if (opts.perfect)
+        rec.perfect = true;
+    if (opts.grade) {
+        const order = ['C', 'B', 'A', 'S'];
+        if (!rec.grade || order.indexOf(opts.grade) > order.indexOf(rec.grade))
+            rec.grade = opts.grade;
+    }
+    state.stages[stageId] = rec;
+    if (state.resume)
+        delete state.resume[stageId];
+    let bonusGained = 0;
+    if (first) {
+        bonusGained = opts.bonus;
+        addXp(bonusGained);
+    }
+    if (stageId === 's0')
+        unlock('tutorial');
+    if (opts.perfect)
+        unlock('noMiss');
+    if (opts.grade === 'S')
+        unlock('finalS');
+    if (STAGES.every((s) => state.stages[s.id]?.cleared))
+        unlock('allClear');
+    touch();
+    persist();
+    return { firstClear: first, bonusGained };
+}
+const isCleared = (id) => !!state.stages[id]?.cleared;
+const allStagesCleared = () => STAGES.every((s) => isCleared(s.id));
+const isUnlocked = (index) => index === 0 || isCleared(STAGES[index - 1].id);
+function setNick(n) {
+    state.nick = n;
+    persist();
+}
+function setReduceMotion(v) {
+    state.settings.reduceMotion = v;
+    persist();
+}
+function addTrial(rec) {
+    const prev = state.trials.filter((t) => t.cond === rec.cond);
+    const personalBest = prev.length > 0 && rec.score > Math.max(...prev.map((t) => t.score));
+    state.trials.push(rec);
+    if (state.trials.length > 200)
+        state.trials = state.trials.slice(-200);
+    unlock('trialFirst');
+    if (rec.total >= 10 && rec.correct === rec.total)
+        unlock('trialPerfect');
+    if (personalBest)
+        unlock('personalBest');
+    touch();
+    persist();
+    return { personalBest };
+}
+function setLastTrial(t) {
+    state.lastTrial = t;
+    persist();
+}
+function removeTrial(id) {
+    state.trials = state.trials.filter((t) => t.id !== id);
+    persist();
+}
+function resetAll() {
+    state = fresh();
+    try {
+        localStorage.removeItem(KEY);
+    }
+    catch {
+        /* noop */
+    }
+    listeners.forEach((f) => f());
+}
+function exportJson() {
+    return JSON.stringify(state, null, 2);
+}
+function weakCategories() {
+    return Object.entries(state.stats.byCat)
+        .filter(([, [, t]]) => t >= 3)
+        .map(([cat, [c, t]]) => ({ cat, acc: c / t, n: t }))
+        .sort((a, b) => a.acc - b.acc);
+}
+
+return { toasts, xpFx, getState, isStorageOk, subscribe, addXp, recordAnswer, recordStat, recordCodeReviewSuccess, getResume, setResume, setLastStage, clearStage, isCleared, allStagesCleared, isUnlocked, setNick, setReduceMotion, addTrial, setLastTrial, removeTrial, resetAll, exportJson, weakCategories };
+})();
+__m["components/ui.js"] = (() => {
+// 共通UI部品
+const { h } = __m["dom.js"];
+const { FACT_MAP } = __m["content/facts.js"];
+const { FACT_STATUS_LABEL } = __m["content/types.js"];
+const STATUS_ICON = { confirmed: '✔', secondary: '◐', unconfirmed: '？' };
+/** 色だけに頼らず、アイコンとテキストも併用する */
+function statusBadge(status) {
+    return h(`span.badge.badge-${status}`, null, h('span', { 'aria-hidden': 'true' }, STATUS_ICON[status] + ' '), FACT_STATUS_LABEL[status]);
+}
+function bar(value, label, cls = '') {
+    const pct = Math.max(0, Math.min(100, Math.round(value * 100)));
+    return h(`div.bar${cls ? '.' + cls : ''}`, { role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': pct, 'aria-label': label }, h('div.bar-fill', { style: `width:${pct}%` }));
+}
+function externalLink(href, text) {
+    return h('a', { href, target: '_blank', rel: 'noopener noreferrer' }, text, h('span.sr-only', null, '（新しいタブで開きます）'), h('span', { 'aria-hidden': 'true' }, ' ↗'));
+}
+function factCard(f, open = false, onOpen) {
+    const d = h('details.fact', { id: `fact-${f.id}`, open }, h('summary', null, h('span.fact-title', null, f.title), ' ', statusBadge(f.status)), h('div.fact-body', null, h('p', null, f.body), f.caveat ? h('p.caveat', null, h('strong', null, '確認できていない範囲・注意：'), f.caveat) : null, h('div.fact-src', null, h('strong', null, '出典（発表主体・発表日・確認日）'), h('ul', null, f.sources.map((s) => h('li', null, externalLink(s.url, s.label), h('br'), h('span.muted', null, `${s.publisher}｜発表日 ${s.published}｜確認日 ${s.checked}`), s.note ? h('br') : null, s.note ? h('span.muted', null, `※${s.note}`) : null))))));
+    if (onOpen)
+        d.addEventListener('toggle', () => { if (d.open)
+            onOpen(); });
+    return d;
+}
+function renderBlocks(blocks) {
+    return h('div.prose', null, blocks.map((b) => {
+        switch (b.t) {
+            case 'p': return h('p', null, b.text);
+            case 'ul': return h('ul', null, b.items.map((i) => h('li', null, i)));
+            case 'note': return h(`div.note.note-${b.tone}`, { role: 'note' }, h('span', { 'aria-hidden': 'true' }, b.tone === 'warn' ? '⚠ ' : b.tone === 'fact' ? '📌 ' : 'ℹ '), b.text);
+            case 'table': return h('div.table-wrap', null, h('table', null, h('thead', null, h('tr', null, b.head.map((x) => h('th', { scope: 'col' }, x)))), h('tbody', null, b.rows.map((r) => h('tr', null, r.map((c, i) => i === 0 ? h('th', { scope: 'row' }, c) : h('td', null, c)))))));
+            case 'code': return h('pre.code', null, h('code', null, b.lines.join('\n')));
+            case 'fact': return FACT_MAP[b.id] ? factCard(FACT_MAP[b.id], false) : null;
+        }
+    }));
+}
+function toggleBtn(label, pressed, onclick, fk) {
+    return h('button.btn.ghost', { type: 'button', 'aria-pressed': pressed ? 'true' : 'false', 'data-fk': fk, onclick }, label);
+}
+function logo() {
+    const svg = `<svg viewBox="0 0 64 64" width="34" height="34" aria-hidden="true" focusable="false"><path d="M32 6 11 15v15c0 13 8.6 22.5 21 28 12.4-5.5 21-15 21-28V15z" fill="none" stroke="#22d3ee" stroke-width="4"/><path d="m22 32 7 7 13-15" fill="none" stroke="#22d3ee" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    const span = h('span.logo-mark');
+    span.innerHTML = svg; // 固定の静的SVG文字列のみ（動的入力は含まない）
+    return span;
+}
+
+return { statusBadge, bar, externalLink, factCard, renderBlocks, toggleBtn, logo };
+})();
+__m["components/home.js"] = (() => {
+// トップページ・ダッシュボード
+const { h, fmtDate } = __m["dom.js"];
+const { ACHIEVEMENTS, LEVELS, SERVICE, levelFor, titlesFor } = __m["config/game.js"];
+const { STAGES } = __m["content/stages.js"];
+const { CAT_LABEL } = __m["content/types.js"];
+const { allStagesCleared, exportJson, getState, isCleared, isStorageOk, isUnlocked, resetAll, setReduceMotion, weakCategories } = __m["state/store.js"];
+const { bar, logo } = __m["components/ui.js"];
+function overall() {
+    const st = getState();
+    const cleared = STAGES.filter((s) => isCleared(s.id)).length;
+    return { cleared, total: STAGES.length, ratio: cleared / STAGES.length, xp: st.xp, lv: levelFor(st.xp) };
+}
+function xpAvailable() {
+    return 0;
+}
+void xpAvailable;
+function levelPanel() {
+    const o = overall();
+    const lv = o.lv;
+    return h('div.levelpanel', null, h('div.lv-line', null, h('span.lv-badge', null, `Lv.${lv.lv}`), h('strong', null, lv.name), h('span.muted', null, `${o.xp} XP`)), bar(lv.progress, `次のレベルまでの進み具合`), h('p.muted.small', null, lv.next ? `次のレベル（Lv.${lv.next.lv} ${lv.next.name}）まで あと ${lv.next.xp - o.xp} XP` : '最高レベルに到達しました'));
+}
+function stageCard(i) {
+    const s = STAGES[i];
+    const rec = getState().stages[s.id];
+    const unlocked = isUnlocked(i);
+    const cleared = !!rec?.cleared;
+    return h('article', { class: `stage-card ${cleared ? 'cleared' : ''} ${unlocked ? '' : 'locked'}`, 'aria-labelledby': `sc-${s.id}` }, h('div.sc-top', null, h('span.sc-no', null, `STAGE ${s.no}`), h('span', { class: `status ${cleared ? 'ok' : unlocked ? 'open' : 'lock'}` }, cleared ? '✔ クリア済み' : unlocked ? '● 挑戦できます' : '🔒 ロック中')), h('h3', { id: `sc-${s.id}` }, s.title), h('p.muted.small', null, s.subtitle), h('div.meta-row', null, h('span.chip', null, `難易度：${s.difficulty}`), h('span.chip', null, `約${s.minutes}分`), h('span.chip', null, `初回ボーナス +${s.clearBonus}XP`)), s.meta.status === '一部未確認' ? h('p.small.warn-text', null, '⚠ 一部、未確認の情報を含みます（出典・確認状況を明示）') : null, h('p.small', null, '正答率：', cleared ? h('strong', null, `${Math.round(rec.bestAccuracy * 100)}%`) : h('span.muted', null, '未クリア'), cleared ? h('span.muted', null, `（最高記録${rec.perfect ? '・ノーミス' : ''}）`) : null), rec?.grade ? h('p.small', null, `総合ランク：${rec.grade}`) : null, unlocked ? h('a.btn.primary', { href: `#/stage/${s.id}`, 'aria-label': `STAGE ${s.no} ${cleared ? '再挑戦' : '挑戦'}：${s.title}` }, cleared ? '再挑戦する' : '挑戦する ▶')
+        : h('button.btn.ghost', { type: 'button', disabled: true, 'aria-label': `STAGE ${s.no} はロック中。STAGE ${STAGES[i - 1].no} をクリアすると解放されます` }, `STAGE ${STAGES[i - 1].no} をクリアで解放`));
+}
+function homePage() {
+    const o = overall();
+    const st = getState();
+    const nextIdx = STAGES.findIndex((s) => !isCleared(s.id));
+    const continueTo = st.lastStage && !isCleared(st.lastStage) ? st.lastStage : nextIdx >= 0 ? STAGES[nextIdx].id : null;
+    const trialOpen = allStagesCleared();
+    return h('div.home', null, h('section.hero', null, h('div.hero-text', null, h('div.hero-logo', null, logo(), h('span', null, SERVICE.name)), h('h1', null, SERVICE.catch), h('p.lead', null, SERVICE.sub), h('p.muted.small', null, '2026年10月21日に公表されたPHPの脆弱性を題材に、Webの仕組みから対策までを、架空のサービスで安全に体験します。'), h('div.actions', null, h('a.btn.primary.big', { href: continueTo ? `#/stage/${continueTo}` : '#/stage/s0', 'data-fk': 'start' }, o.cleared === 0 ? '学習を始める ▶' : continueTo ? '続きから学ぶ ▶' : '復習する ▶'), h('a.btn.ghost.big', { href: '#/facts' }, '今回のPHP問題について知る')), h('p.muted.small', null, 'アカウント登録は不要です。進捗はこのブラウザ内にだけ保存されます。')), h('div.hero-panel', { 'aria-label': 'あなたの進み具合' }, h('h2.sr-only', null, 'あなたの進み具合'), levelPanel(), h('div.progress-total', null, h('div', null, h('span.muted', null, '全体の学習進捗'), h('strong', null, `${Math.round(o.ratio * 100)}%`), h('span.muted.small', null, ` （${o.cleared} / ${o.total} ステージ）`)), bar(o.ratio, '全体の学習進捗')), h('div.actions', null, h('a.btn.ghost', { href: '#/dashboard' }, '📊 ダッシュボード'), h('a.btn.ghost', { href: '#/ranking' }, '🏆 ランキング')))), !isStorageOk() ? h('div.note.note-warn', { role: 'alert' }, '⚠ このブラウザでは進捗を保存できない状態です（プライベートモードなど）。学習は続けられますが、閉じると記録は消えます。') : null, h('section', { 'aria-labelledby': 'stages-h' }, h('h2', { id: 'stages-h' }, '学習ステージ'), h('div.stage-grid', null, STAGES.map((_, i) => stageCard(i)))), h('section.trial-teaser', { 'aria-labelledby': 'trial-h' }, h('div', null, h('h2', { id: 'trial-h' }, '⏱ CYBER TRIAL（クリア後の総合問題・タイムアタック）'), h('p', null, 'STAGE 0〜6 をすべてクリアすると解放。学んだ内容から毎回ちがう問題がランダムに出ます。速さだけでなく、正確さも評価されます。'), h('p.muted.small', null, trialOpen ? '✔ 解放済み' : `🔒 あと ${o.total - o.cleared} ステージで解放`)), h('a', { class: `btn ${trialOpen ? 'primary' : 'ghost'}`, href: '#/trial' }, trialOpen ? 'CYBER TRIAL へ ▶' : '内容を見る')), h('section.unconfirmed-note', null, h('h2', null, '事実と推測を区別します'), h('p', null, 'この教材では、今回のPHP問題について「公的機関の公表で確認できたこと」「二次情報」「未確認」を分けて表示し、出典と確認日を付けています。確認できないことは推測で補いません。'), h('a.btn.ghost', { href: '#/facts' }, '事実と出典を見る')));
+}
+function dashboardPage() {
+    const st = getState();
+    const o = overall();
+    const acc = st.stats.total ? st.stats.correct / st.stats.total : 0;
+    const unlocked = Object.keys(st.achievements);
+    const titles = titlesFor(unlocked);
+    const weak = weakCategories().slice(0, 3);
+    return h('div.dash', null, h('h1', null, '📊 ダッシュボード'), h('div.dash-grid', null, h('div.card', null, h('h2', null, 'レベルとXP'), levelPanel(), h('ul.small.muted', null, LEVELS.map((l) => h('li', null, `Lv.${l.lv} ${l.name}：${l.xp} XP〜`)))), h('div.card', null, h('h2', null, '全体の進捗'), h('p', null, h('strong.big-num', null, `${Math.round(o.ratio * 100)}%`), ` ${o.cleared} / ${o.total} ステージ`), bar(o.ratio, '全体進捗'), h('p', null, '正答率：', h('strong', null, st.stats.total ? `${Math.round(acc * 100)}%` : '—'), h('span.muted.small', null, ` （${st.stats.correct} / ${st.stats.total} 問）`)), h('p.muted.small', null, `最終学習日時：${fmtDate(st.lastStudy)}`)), h('div.card', null, h('h2', null, '苦手分野'), weak.length ? h('ul', null, weak.map((w) => h('li', null, `${CAT_LABEL[w.cat] || w.cat}：正答率 ${Math.round(w.acc * 100)}%（${w.n}問）`))) : h('p.muted', null, '3問以上回答したカテゴリがまだありません。学習を進めると表示されます。'), weak.length ? h('p.small.muted', null, '正答率の低い順です。該当ステージの再挑戦や、CYBER TRIALで復習できます。') : null)), h('div.card', null, h('h2', null, 'ステージ別の進捗'), h('ul.stage-prog', null, STAGES.map((s) => {
+        const r = st.stages[s.id];
+        return h('li', null, h('span', null, `STAGE ${s.no} ${s.title}`), h('span.muted.small', null, r?.cleared ? `✔ クリア済み（最高正答率 ${Math.round(r.bestAccuracy * 100)}%${r.perfect ? '・ノーミス' : ''}${r.grade ? '・ランク' + r.grade : ''}）` : '未クリア'), bar(r?.cleared ? 1 : 0, `${s.title}の進捗`, 'small'));
+    }))), h('div.card', null, h('h2', null, '称号・実績'), titles.length ? h('p', null, '称号：', titles.map((t) => h('span.chip.ok', null, t))) : h('p.muted.small', null, '称号はまだありません。'), h('ul.ach', null, ACHIEVEMENTS.map((a) => {
+        const on = !!st.achievements[a.id];
+        return h('li', { class: on ? 'on' : 'off' }, h('span', { 'aria-hidden': 'true' }, on ? a.icon : '🔒'), h('div', null, h('strong', null, a.name), h('div.muted.small', null, a.desc), on ? h('div.muted.small', null, `解除：${fmtDate(st.achievements[a.id])}`) : h('div.muted.small', null, '未解除')));
+    }))), h('div.card', null, h('h2', null, '設定とデータ'), h('label.switch', null, h('input', { type: 'checkbox', checked: st.settings.reduceMotion, onchange: (e) => setReduceMotion(e.target.checked), 'data-fk': 'rm' }), ' 動きを減らす（アニメーションを最小限にする。OSの「視差効果を減らす」設定にも従います）'), h('div.actions', null, h('button.btn.ghost', { type: 'button', onclick: () => {
+            const blob = new Blob([exportJson()], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'cyber-quest-progress.json';
+            a.click();
+            URL.revokeObjectURL(a.href);
+        } }, '進捗データを書き出す（JSON）'), h('button.btn.danger', { type: 'button', onclick: () => { if (window.confirm('進捗・XP・記録をすべて削除します。元に戻せません。よろしいですか？')) {
+            resetAll();
+            location.hash = '#/';
+        } } }, '進捗をすべて削除')), h('p.muted.small', null, '保存先はこのブラウザ（localStorage）だけです。他の端末とは同期されません。')));
+}
+
+return { stageCard, homePage, dashboardPage };
+})();
+__m["logic.js"] = (() => {
+// 画面に依存しない純粋なロジック（採点・出題・スコア式・ランキング集計）。テスト対象。
+const { POINTS_BY_DIFF, TRIAL, XP_BY_DIFF } = __m["config/game.js"];
+function gradeQuestion(q, a) {
+    if (q.type === 'single' && a.type === 'single')
+        return a.value === q.answer;
+    if (q.type === 'multi' && a.type === 'multi') {
+        const want = [...q.answer].sort();
+        const got = [...a.value].sort();
+        return want.length === got.length && want.every((v, i) => v === got[i]);
+    }
+    if (q.type === 'order' && a.type === 'order') {
+        const want = q.order;
+        return want.length === a.value.length && want.every((v, i) => v === a.value[i]);
+    }
+    if (q.type === 'code' && a.type === 'code')
+        return a.line === q.badLine && a.fix === q.fixAnswer;
+    return false;
+}
+const questionPoints = (q) => q.points ?? POINTS_BY_DIFF[q.diff];
+const questionXp = (q) => XP_BY_DIFF[q.diff];
+/** score = round((正解の配点合計 + 速度ボーナス合計) × 正答率)。速度ボーナスは正解にだけ付く。 */
+function trialScore(results) {
+    const total = results.length;
+    let correct = 0;
+    let base = 0;
+    let bonus = 0;
+    let maxPossible = 0;
+    for (const r of results) {
+        const p = questionPoints(r.q);
+        maxPossible += p * (1 + TRIAL.speedBonusMax);
+        if (r.answered && r.correct) {
+            correct++;
+            base += p;
+            const sec = r.ms / 1000;
+            bonus += p * TRIAL.speedBonusMax * Math.max(0, 1 - sec / TRIAL.targetSec);
+        }
+    }
+    const accuracy = total ? correct / total : 0;
+    return {
+        score: Math.round((base + bonus) * accuracy),
+        correct,
+        total,
+        accuracy,
+        basePoints: base,
+        speedBonus: Math.round(bonus * 10) / 10,
+        maxPossible: Math.round(maxPossible),
+    };
+}
+const conditionKey = (count, mode, level) => `${count}問・${mode === 'timed' ? '制限時間あり' : '制限時間なし'}・${level === 'beginner' ? '初心者向け' : '標準'}`;
+/** 出題セットを作る：重複なし・カテゴリを均等に・難易度を混ぜる */
+function pickTrialSet(pool, count, level, rnd = Math.random) {
+    const allowed = level === 'beginner' ? ['easy', 'normal'] : ['easy', 'normal', 'hard'];
+    const candidates = pool.filter((q) => allowed.includes(q.diff));
+    const mix = [];
+    const ratio = level === 'beginner' ? { easy: 0.5, normal: 0.5, hard: 0 } : { easy: 0.25, normal: 0.45, hard: 0.3 };
+    ['easy', 'normal', 'hard'].forEach((d) => {
+        for (let i = 0; i < Math.round(count * ratio[d]); i++)
+            mix.push(d);
+    });
+    while (mix.length < count)
+        mix.push(level === 'beginner' ? 'normal' : 'normal');
+    mix.length = count;
+    // 難易度の割当順をシャッフル
+    for (let i = mix.length - 1; i > 0; i--) {
+        const j = Math.floor(rnd() * (i + 1));
+        [mix[i], mix[j]] = [mix[j], mix[i]];
+    }
+    const used = new Set();
+    const catCount = {};
+    const picked = [];
+    for (const d of mix) {
+        let cands = candidates.filter((q) => !used.has(q.id) && q.diff === d);
+        if (!cands.length)
+            cands = candidates.filter((q) => !used.has(q.id));
+        if (!cands.length)
+            break;
+        const min = Math.min(...cands.map((q) => catCount[q.cat] ?? 0));
+        const best = cands.filter((q) => (catCount[q.cat] ?? 0) === min);
+        const q = best[Math.floor(rnd() * best.length)];
+        used.add(q.id);
+        catCount[q.cat] = (catCount[q.cat] ?? 0) + 1;
+        picked.push(q);
+    }
+    return picked;
+}
+/** 今週（月曜0:00〜）の開始時刻 */
+function weekStart(now) {
+    const d = new Date(now);
+    d.setHours(0, 0, 0, 0);
+    const dow = (d.getDay() + 6) % 7; // 月=0
+    d.setDate(d.getDate() - dow);
+    return d;
+}
+function rankBoard(records, board, cond, now = new Date()) {
+    let r = records.filter((x) => x.cond === cond);
+    if (board === 'weekly')
+        r = r.filter((x) => new Date(x.at) >= weekStart(now));
+    if (board === 'timeattack')
+        r = r.filter((x) => x.mode === 'timed');
+    if (board === 'beginner')
+        r = r.filter((x) => x.level === 'beginner');
+    return r.sort((a, b) => b.score - a.score || a.ms - b.ms || a.at.localeCompare(b.at));
+}
+function sanitizeNick(s) {
+    const t = s.replace(/[\u0000-\u001f\u007f<>]/g, '').trim().slice(0, 12);
+    return t || 'ななし';
+}
+/** 最終評価（STAGE 6）：各観点の達成率から S/A/B/C を決める */
+function gradeFinal(axes, max) {
+    const ratios = {
+        risk: max.risk ? axes.risk / max.risk : 1,
+        info: max.info ? axes.info / max.info : 1,
+        order: max.order ? axes.order / max.order : 1,
+        explain: max.explain ? axes.explain / max.explain : 1,
+    };
+    const vals = Object.values(ratios);
+    const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+    const min = Math.min(...vals);
+    const grade = avg >= 0.85 && min >= 0.7 ? 'S' : avg >= 0.7 ? 'A' : avg >= 0.5 ? 'B' : 'C';
+    return { grade, ratios, avg };
+}
+
+return { gradeQuestion, questionPoints, questionXp, trialScore, conditionKey, pickTrialSet, weekStart, rankBoard, sanitizeNick, gradeFinal };
+})();
+__m["components/pages.js"] = (() => {
+// ランキング（この端末内の記録）／シェアカード／事実と出典／プライバシー
+const { fmtDate, fmtSec, h, stateful } = __m["dom.js"];
+const { ACHIEVEMENTS, SERVICE, levelFor, titlesFor } = __m["config/game.js"];
+const { FACTS, FACTS_CHECKED, PRE_RELEASE_CHECKLIST } = __m["content/facts.js"];
+const { STAGES } = __m["content/stages.js"];
+const { FACT_STATUS_LABEL } = __m["content/types.js"];
+const { rankBoard } = __m["logic.js"];
+const { getState, isCleared, removeTrial } = __m["state/store.js"];
+const { externalLink, factCard, statusBadge } = __m["components/ui.js"];
+// ───────────────────────── ランキング ─────────────────────────
+const BOARD_NOTE = '選んだ出題条件の記録を、スコアの高い順に並べます（同点は所要時間が短い順）。';
+function rankingPage() {
+    const st = getState();
+    const conds = Array.from(new Set(st.trials.map((t) => t.cond)));
+    return h('div.ranking', null, h('h1', null, '🏆 マイ・ランキング（この端末内の記録）'), h('div.note.note-warn', { role: 'note' }, h('strong', null, 'あなたがこの端末で保存した記録だけのランキングです（出題条件ごと）。'), ' 他の利用者の記録は含まれません。同じ出題条件の記録どうしを比べて、自己ベストの更新を目指しましょう。'), stateful({ cond: conds[0] ?? '', tick: 0 }, (s, set) => {
+        const cond = conds.includes(s.cond) ? s.cond : conds[0] ?? '';
+        const rows = cond ? rankBoard(getState().trials, 'overall', cond) : [];
+        return h('div', null, h('p.muted', null, BOARD_NOTE), conds.length === 0
+            ? h('div.card', null, h('p', null, 'まだ記録がありません。'), h('p.muted.small', null, 'CYBER TRIAL（STAGE 0〜6をすべてクリアすると解放）の結果画面から「この端末内の記録に保存」すると、ここに表示されます。'), h('a.btn.primary', { href: '#/trial' }, 'CYBER TRIAL へ'))
+            : h('div.card', null, h('label', null, h('strong', null, '比較する条件（同じ条件の記録どうしだけを比べます）'), h('select', { 'data-fk': 'cond', onchange: (e) => set({ cond: e.target.value }) }, conds.map((c) => h('option', { value: c, selected: c === cond }, c)))), rows.length === 0
+                ? h('p.muted', null, 'この条件の記録はありません。')
+                : h('div.table-wrap', null, h('table.rank', null, h('caption.sr-only', null, 'ランキング（この端末内の記録）'), h('thead', null, h('tr', null, ['順位', 'ニックネーム', 'スコア', '正答率', '所要時間', '達成日', ''].map((x) => h('th', { scope: 'col' }, x)))), h('tbody', null, rows.slice(0, 20).map((r, i) => h('tr', null, h('th', { scope: 'row' }, `${i + 1}位`), h('td', null, r.nick), h('td', null, String(r.score)), h('td', null, `${Math.round((r.correct / r.total) * 100)}%（${r.correct}/${r.total}）`), h('td', null, fmtSec(r.ms) + (r.status === 'timeout' ? '（時間切れ）' : '')), h('td', null, fmtDate(r.at)), h('td', null, h('button.btn.small.ghost', { type: 'button', 'aria-label': `${r.nick}の記録（${r.score}点）を削除`, onclick: () => { if (window.confirm('この記録を削除しますか？')) {
+                        removeTrial(r.id);
+                        set((x) => ({ tick: x.tick + 1 }));
+                    } } }, '削除')))))))), h('div.card', null, h('h2', null, '表示する情報について'), h('ul', null, h('li', null, '表示するのは、ニックネーム・スコア・正答率・所要時間・達成日だけです'), h('li', null, 'この画面の情報は、この端末の外には送信されません'), h('li', null, '記録はいつでも削除できます（「ダッシュボード」からすべて削除も可能）'))));
+    }));
+}
+// ───────────────────────── シェアカード ─────────────────────────
+const CARD_MESSAGES = {
+    1: '知ることが、守る力になる。',
+    2: 'あなたはWebの裏側を学んだ。',
+    3: '脆弱性を見抜く目を、手に入れた。',
+    4: '守る順番を、自分で決められる。',
+    5: 'サイバーガーディアンに到達！',
+};
+function shareUrl() {
+    return SERVICE.publicUrl || `${location.origin}${location.pathname}`;
+}
+const FONT = (px, w = 700) => `${w} ${px}px "Hiragino Sans","Noto Sans JP","Yu Gothic",Meiryo,sans-serif`;
+function wrapText(ctx, text, maxW) {
+    const lines = [];
+    let cur = '';
+    for (const ch of text) {
+        if (ctx.measureText(cur + ch).width > maxW && cur) {
+            lines.push(cur);
+            cur = ch;
+        }
+        else
+            cur += ch;
+    }
+    if (cur)
+        lines.push(cur);
+    return lines;
+}
+/** 背景・ロゴ・フッター（URLと注記）。2種類のカードで共通 */
+function cardFrame(canvas, url, nick) {
+    const W = 1200;
+    const H = 630;
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    const g = ctx.createLinearGradient(0, 0, W, H);
+    g.addColorStop(0, '#06122b');
+    g.addColorStop(1, '#0b2a5b');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = 'rgba(34,211,238,0.10)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 40) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, H);
+        ctx.stroke();
+    }
+    for (let y = 0; y < H; y += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(W, y);
+        ctx.stroke();
+    }
+    ctx.strokeStyle = '#22d3ee';
+    ctx.lineWidth = 6;
+    ctx.strokeRect(24, 24, W - 48, H - 48);
+    ctx.save();
+    ctx.translate(60, 56);
+    ctx.scale(1.2, 1.2);
+    ctx.strokeStyle = '#22d3ee';
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(32, 6);
+    ctx.lineTo(11, 15);
+    ctx.lineTo(11, 30);
+    ctx.bezierCurveTo(11, 43, 19.6, 52.5, 32, 58);
+    ctx.bezierCurveTo(44.4, 52.5, 53, 43, 53, 30);
+    ctx.lineTo(53, 15);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(22, 32);
+    ctx.lineTo(29, 39);
+    ctx.lineTo(42, 24);
+    ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = '#e6f1ff';
+    ctx.font = FONT(34, 800);
+    ctx.fillText('CYBER QUEST JAPAN', 150, 92);
+    ctx.fillStyle = '#7dd3fc';
+    ctx.font = FONT(22, 600);
+    ctx.fillText('for PHP', 150, 124);
+    ctx.textAlign = 'right';
+    if (nick) {
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = FONT(26, 600);
+        ctx.fillText(`${nick} さん`, W - 60, 92);
+    }
+    ctx.fillStyle = '#93c5fd';
+    ctx.font = FONT(20, 500);
+    ctx.fillText(url.replace(/^https?:\/\//, ''), W - 60, 596);
+    ctx.fillStyle = '#7c93b8';
+    ctx.font = FONT(16, 500);
+    ctx.fillText('民間の学習ゲームです。政府機関等による認定・認証ではありません。', W - 60, 570);
+    ctx.textAlign = 'left';
+    return ctx;
+}
+/** 学習の記録カード（1200×630）。外部画像・外部フォントは使わない */
+function drawCard(canvas, d) {
+    const ctx = cardFrame(canvas, d.url, '');
+    ctx.fillStyle = '#22d3ee';
+    ctx.font = FONT(30, 700);
+    ctx.fillText(`Lv.${d.lvNo}`, 70, 220);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = FONT(66, 800);
+    ctx.fillText(d.lvName, 70, 296);
+    if (d.title) {
+        ctx.fillStyle = '#fde68a';
+        ctx.font = FONT(26, 700);
+        ctx.fillText(`称号：${d.title}`, 70, 340);
+    }
+    if (d.nick) {
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = FONT(24, 600);
+        ctx.fillText(`${d.nick} さん`, 70, 376);
+    }
+    const stats = [
+        ['クリア', `${d.cleared} / ${d.total} ステージ`],
+        ['正答率', d.acc === null ? '—' : `${Math.round(d.acc * 100)}%`],
+        ['獲得XP', `${d.xp} XP`],
+    ];
+    stats.forEach(([k, v], i) => {
+        const x = 70 + i * 360;
+        ctx.fillStyle = 'rgba(255,255,255,0.07)';
+        ctx.fillRect(x, 410, 330, 96);
+        ctx.fillStyle = '#93c5fd';
+        ctx.font = FONT(22, 600);
+        ctx.fillText(k, x + 20, 444);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = FONT(36, 800);
+        ctx.fillText(v, x + 20, 490);
+    });
+    ctx.fillStyle = '#e6f1ff';
+    ctx.font = FONT(34, 700);
+    wrapText(ctx, d.message, 540).slice(0, 2).forEach((l, i) => ctx.fillText(l, 70, 560 + i * 40));
+}
+/** CYBER TRIAL結果カード：出題条件・スコア・タイムをメインに表示 */
+function drawTrialCard(canvas, d) {
+    const ctx = cardFrame(canvas, d.url, d.nick);
+    ctx.fillStyle = '#22d3ee';
+    ctx.font = FONT(30, 800);
+    ctx.fillText('CYBER TRIAL 結果', 70, 190);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = FONT(40, 800);
+    ctx.fillText(`出題条件：${d.cond}`, 70, 244);
+    const boxes = [['SCORE スコア', String(d.score), 70, 118], ['TIME タイム', fmtSec(d.ms), 630, 84]];
+    boxes.forEach(([label, val, x, size]) => {
+        ctx.fillStyle = 'rgba(255,255,255,0.08)';
+        ctx.fillRect(x, 272, 500, 190);
+        ctx.fillStyle = '#93c5fd';
+        ctx.font = FONT(24, 700);
+        ctx.fillText(label, x + 24, 312);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = FONT(size, 900);
+        ctx.fillText(val, x + 24, 436);
+    });
+    ctx.fillStyle = '#fde68a';
+    ctx.font = FONT(28, 700);
+    ctx.fillText(`正答率 ${Math.round((d.correct / Math.max(1, d.total)) * 100)}%（${d.correct}/${d.total}）　ランク ${d.rank}`, 70, 510);
+    ctx.fillStyle = '#e6f1ff';
+    ctx.font = FONT(26, 600);
+    wrapText(ctx, d.message, 520).slice(0, 2).forEach((l, i) => ctx.fillText(l, 70, 566 + i * 32));
+}
+function cardData(withNick, message) {
+    const st = getState();
+    const lv = levelFor(st.xp);
+    const titles = titlesFor(Object.keys(st.achievements));
+    return {
+        lvNo: lv.lv, lvName: lv.name, title: titles[0] ?? '',
+        cleared: STAGES.filter((s) => isCleared(s.id)).length, total: STAGES.length,
+        acc: st.stats.total ? st.stats.correct / st.stats.total : null, xp: st.xp,
+        message, nick: withNick ? st.nick : '', url: shareUrl(),
+    };
+}
+function defaultShareText() {
+    const st = getState();
+    const lv = levelFor(st.xp);
+    const n = STAGES.filter((s) => isCleared(s.id)).length;
+    const learned = isCleared('s2') && isCleared('s4') ? '今回は脆弱性とセキュリティパッチの仕組みを理解しました。' : '';
+    return `CYBER QUEST JAPANでサイバーセキュリティを学習中。${n}ステージをクリアし、Lv.${lv.lv}「${lv.name}」になりました。${learned}あなたも挑戦してみませんか？ #サイバーセキュリティ #情報セキュリティ`;
+}
+function trialShareText(t) {
+    return `CYBER QUEST JAPANのCYBER TRIALに挑戦！ 出題条件：${t.cond}｜スコア ${t.score}｜タイム ${fmtSec(t.ms)}｜正答率 ${Math.round((t.correct / Math.max(1, t.total)) * 100)}% あなたも挑戦してみませんか？ #サイバーセキュリティ #情報セキュリティ`;
+}
+function sharePage(arg) {
+    const st = getState();
+    const lv = levelFor(st.xp);
+    const lastTrial = st.lastTrial;
+    const canvas = h('canvas', { role: 'img', 'aria-label': 'シェア用の結果カードのプレビュー', class: 'cardcanvas' });
+    const status = h('p.muted.small', { role: 'status' });
+    const initKind = arg === 'trial' && lastTrial ? 'trial' : 'learn';
+    return h('div.sharepage', null, h('h1', null, '📣 結果カードをシェア'), st.xp === 0 && STAGES.every((s) => !isCleared(s.id)) && !lastTrial
+        ? h('div.note.note-info', null, 'まだ学習の記録がありません。ステージを進めると、カードの内容が増えます。', h('a', { href: '#/' }, ' ステージへ'))
+        : null, stateful({ kind: initKind, withNick: false, msgLearn: CARD_MESSAGES[lv.lv] ?? CARD_MESSAGES[1], msgTrial: 'この端末内の記録です。', textLearn: defaultShareText(), textTrial: lastTrial ? trialShareText(lastTrial) : '' }, (s, set) => {
+        const isTrial = s.kind === 'trial' && !!lastTrial;
+        const nick = s.withNick && !!st.nick ? st.nick : '';
+        const redraw = () => {
+            if (isTrial && lastTrial)
+                drawTrialCard(canvas, { ...lastTrial, nick, url: shareUrl(), message: s.msgTrial });
+            else
+                drawCard(canvas, cardData(!!nick, s.msgLearn));
+        };
+        redraw();
+        const url = shareUrl();
+        const text = isTrial ? s.textTrial : s.textLearn;
+        const fullText = `${text}\n${url}`;
+        const toBlob = () => new Promise((res) => canvas.toBlob((b) => res(b), 'image/png'));
+        const canNativeShare = typeof navigator.share === 'function';
+        const setText = (v) => { if (isTrial)
+            s.textTrial = v;
+        else
+            s.textLearn = v; };
+        return h('div', null, h('div.tabs', { role: 'group', 'aria-label': 'カードの種類' }, h('button', { type: 'button', class: `btn ${!isTrial ? 'primary' : 'ghost'}`, 'aria-pressed': !isTrial ? 'true' : 'false', 'data-fk': 'k-learn', onclick: () => set({ kind: 'learn' }) }, '学習の記録カード'), h('button', { type: 'button', class: `btn ${isTrial ? 'primary' : 'ghost'}`, 'aria-pressed': isTrial ? 'true' : 'false', disabled: !lastTrial, 'data-fk': 'k-trial', onclick: () => set({ kind: 'trial' }) }, 'CYBER TRIAL結果カード')), !lastTrial ? h('p.muted.small', null, 'CYBER TRIALを完走すると、その結果（出題条件・スコア・タイム）のカードを作れます。') : null, h('div.share-grid', null, h('div', null, canvas, h('p.muted.small', null, isTrial ? 'カードに含まれるのは、出題条件・スコア・タイム・正答率・ランク・URLだけです。回答の履歴は含まれません。直近のTRIAL結果が対象です。' : 'カードに含まれるのは、レベル・称号・クリア数・正答率・XP・メッセージ・URLだけです。回答の履歴は含まれません。')), h('div.card', null, h('h2', null, 'カードの内容'), h('label', null, 'カードのメッセージ（編集できます）', h('input', { type: 'text', maxlength: 40, value: isTrial ? s.msgTrial : s.msgLearn, 'data-fk': 'msg', oninput: (e) => { const v = e.target.value; if (isTrial)
+                s.msgTrial = v;
+            else
+                s.msgLearn = v; redraw(); } })), h('label.switch', null, h('input', { type: 'checkbox', checked: s.withNick, disabled: !st.nick, 'data-fk': 'nickc', onchange: (e) => set({ withNick: e.target.checked }) }), st.nick ? ` ニックネーム「${st.nick}」をカードに入れる（初期状態は入れません）` : ' ニックネームをカードに入れる（CYBER TRIALの記録保存時に設定したニックネームがある場合のみ）'), h('h2', null, '共有文（編集できます）'), h('textarea', { rows: 5, maxlength: 240, 'aria-label': '共有文', 'data-fk': 'text', oninput: (e) => setText(e.target.value) }, text), h('p.muted.small', null, '※学習結果を誇張しない・公的な認定のように書かない・個人情報を含めない、の3点を確認してから共有してください。URLは自動で付きます。'), h('div.actions', null, h('button.btn.primary', { type: 'button', 'data-fk': 'png', onclick: async () => {
+                const b = await toBlob();
+                if (!b) {
+                    status.textContent = '画像の生成に失敗しました。別のブラウザでお試しください。';
+                    return;
+                }
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(b);
+                a.download = isTrial ? 'cyber-trial-result.png' : 'cyber-quest-japan-card.png';
+                a.click();
+                window.setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+                status.textContent = '✔ PNG画像を保存しました。SNSには、この画像を添付して投稿してください。';
+            } }, '🖼 PNG画像を保存'), h('a.btn.ghost', { href: `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, target: '_blank', rel: 'noopener noreferrer', 'data-fk': 'x' }, '𝕏 に投稿する（新しいタブ）', h('span.sr-only', null, '（新しいタブで開きます）')), h('a.btn.ghost', { href: `https://www.threads.com/intent/post?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, target: '_blank', rel: 'noopener noreferrer', 'data-fk': 'th' }, '@ Threads に投稿する（新しいタブ）', h('span.sr-only', null, '（新しいタブで開きます）')), canNativeShare ? h('button.btn.ghost', { type: 'button', 'data-fk': 'ws', onclick: async () => {
+                try {
+                    const b = await toBlob();
+                    const file = b ? new File([b], 'cyber-quest-japan-card.png', { type: 'image/png' }) : null;
+                    const data = { text, url };
+                    if (file && navigator.canShare?.({ files: [file] }))
+                        data.files = [file];
+                    await navigator.share(data);
+                    status.textContent = '✔ 共有画面を開きました。';
+                }
+                catch (e) {
+                    if (e.name !== 'AbortError')
+                        status.textContent = '共有できませんでした。画像保存と共有文のコピーをお使いください。';
+                }
+            } }, '📤 端末の共有機能で共有') : null, h('button.btn.ghost', { type: 'button', 'data-fk': 'copy', onclick: async () => {
+                try {
+                    await navigator.clipboard.writeText(fullText);
+                    status.textContent = '✔ 共有文をコピーしました。';
+                }
+                catch {
+                    const ta = document.querySelector('.sharepage textarea');
+                    ta?.focus();
+                    ta?.select();
+                    status.textContent = 'コピーできませんでした。選択した共有文を、手動でコピーしてください。';
+                }
+            } }, '📋 共有文をコピー')), h('p.muted.small', null, 'XとThreadsの投稿画面には、共有文とURLだけが入ります（画像は自動では付きません）。先に「PNG画像を保存」して、投稿画面で画像を添付してください。'), canNativeShare ? null : h('p.muted.small', null, 'お使いのブラウザは端末の共有機能に対応していないため、画像保存と共有文のコピーをご利用ください。'), status)));
+    }));
+}
+// ───────────────────────── 事実と出典 ─────────────────────────
+function factsPage(focusId) {
+    return stateful({ filter: 'all' }, (s, set) => {
+        const list = FACTS.filter((f) => s.filter === 'all' || f.status === s.filter);
+        const counts = (k) => FACTS.filter((f) => f.status === k).length;
+        const el = h('div.factspage', null, h('h1', null, '📌 今回のPHP問題：事実と出典'), h('p.lead', null, '2026年10月21日に公表されたPHPの脆弱性（CVE-2026-109618／CVE-2026-109619）について、確認できたことを出典付きで整理しています。'), h('div.note.note-warn', { role: 'note' }, h('strong', null, '最終確認日：', FACTS_CHECKED), '　情報は日々更新されます。対応の判断には、必ず The PHP Group・IPA・JPCERT/CC・お使いの提供元の最新の公式情報を確認してください。この教材は対応の代わりにはなりません。'), h('div.card', null, h('h2', null, '確認状況の見方'), h('ul', null, h('li', null, statusBadge('confirmed'), ' 公的機関（IPA・JPCERT/CC等）の公表で確認できた内容'), h('li', null, statusBadge('secondary'), ' 民間事業者・報道等の二次情報。原文との照合が必要'), h('li', null, statusBadge('unconfirmed'), ' 確認できていない、または公的に確認されていない内容。教材では事実として扱わない')), h('p.muted.small', null, '区別して読むポイント：「脆弱性がある」「攻撃が試された」「攻撃が成功した」「被害が出た」は別の段階です。「修正版が公開された」ことと「すべてのサイトに適用された」ことも別です。また、問題の所在はPHP本体（処理系）であり、PHPという言語の設計や、各サイトのコードの書き方の問題ではありません（公開情報に基づく整理）。')), h('div.tabs', { role: 'group', 'aria-label': '確認状況で絞り込み' }, [['all', `すべて（${FACTS.length}）`], ['confirmed', `${FACT_STATUS_LABEL.confirmed}（${counts('confirmed')}）`], ['secondary', `${FACT_STATUS_LABEL.secondary}（${counts('secondary')}）`], ['unconfirmed', `${FACT_STATUS_LABEL.unconfirmed}（${counts('unconfirmed')}）`]].map(([k, label]) => h('button', { type: 'button', class: `btn ${s.filter === k ? 'primary' : 'ghost'}`, 'aria-pressed': s.filter === k ? 'true' : 'false', 'data-fk': `f-${k}`, onclick: () => set({ filter: k }) }, label))), h('div.cards', null, list.map((f) => factCard(f, f.id === focusId))), h('div.card', null, h('h2', null, '公開前に確認するリスト（未確認・要原文確認）'), h('ul', null, PRE_RELEASE_CHECKLIST.map((c) => h('li', null, c)))), h('div.card', null, h('h2', null, '教材ごとの更新状態'), h('div.table-wrap', null, h('table', null, h('thead', null, h('tr', null, ['ステージ', '状態', '最終確認日'].map((x) => h('th', { scope: 'col' }, x)))), h('tbody', null, STAGES.map((st) => h('tr', null, h('th', { scope: 'row' }, `STAGE ${st.no} ${st.title}`), h('td', null, st.meta.status), h('td', null, st.meta.lastChecked)))))), h('p.muted.small', null, '今回のPHP問題に関する内容は src/content/facts.ts だけを更新すれば、関連ステージ・問題の表示に反映されます。')), h('p.muted.small', null, '主な一次・公的情報：', externalLink('https://www.ipa.go.jp/security/security-alert/2026/pre-alert20261021.html', 'IPA（事前準備のお願い）'), '　', externalLink('https://www.ipa.go.jp/security/security-alert/2026/alert20261022.html', 'IPA（PHPの脆弱性対策について）'), '　', externalLink('https://www.jpcert.or.jp/at/2026/at260033.html', 'JPCERT/CC 注意喚起')));
+        if (focusId)
+            window.setTimeout(() => document.getElementById(`fact-${focusId}`)?.scrollIntoView({ block: 'center' }), 50);
+        return el;
+    });
+}
+// ───────────────────────── プライバシー・利用上の注意 ─────────────────────────
+function privacyPage() {
+    return h('div.privacy.prose', null, h('h1', null, '🔒 プライバシーと利用上の注意'), h('div.note.note-info', null, SERVICE.disclaimer), h('h2', null, '集める情報・保存する場所'), h('ul', null, h('li', null, 'アカウント登録は不要です。氏名・メールアドレス・位置情報などは収集しません'), h('li', null, '進捗・XP・正答率・実績・ニックネーム・TRIALの記録は、このブラウザの localStorage にだけ保存されます（デモ版）'), h('li', null, 'このアプリは、学習データを外部のサーバーへ送信しません。外部通信は、あなたが押した外部リンク（出典・XやThreadsの投稿画面・報告フォーム）を開くときだけです'), h('li', null, 'アクセス解析・広告・トラッカーは使用していません'), h('li', null, 'ブラウザのデータを消去すると、進捗も消えます。「ダッシュボード」から、書き出し（JSON）と全削除ができます')), h('h2', null, 'ニックネームについて'), h('p', null, '任意です。本名や学校名など、個人を特定できる情報は入れないでください。「マイ・ランキング」（この端末内の記録）にだけ表示され、公開されません。シェアカードに入れるかどうかも、自分で選べます（初期状態は入れません）。'), h('h2', null, '教材の安全性について'), h('ul', null, h('li', null, 'すべての演習は、教材専用の架空のサービス・架空のデータ・架空のコードです'), h('li', null, '実在するサイトへの接続・スキャン・攻撃は行いません。攻撃用のコードや手順は含みません'), h('li', null, '教材の説明は、公開された情報にもとづく学習用の要約です。確認できなかった内容は「未確認」と表示しています'), h('li', null, '実際の対応（更新・停止・復旧など）は、必ず公式の最新情報と、ご自身の環境の提供元・管理者の指示に従ってください')), h('h2', null, 'シェア機能について'), h('p', null, 'シェアカードと共有文は、あなたが操作したときにだけ作られます。内容は自分で確認・編集でき、回答の履歴は含まれません。カードは「民間の学習ゲームの記録」であり、政府機関等による認定・認証ではありません。'), h('h2', null, '外部リンク'), h('p', null, '外部リンクは新しいタブで開き、rel="noopener noreferrer" を付けています。リンク先のサイトの内容・プライバシー対応は、このサービスの管理外です。'), h('h2', null, 'ご意見・誤りの報告'), SERVICE.feedbackUrl
+        ? h('p', null, '内容の誤り・古い情報・分かりにくい点を見つけたら、', externalLink(SERVICE.feedbackUrl, '報告フォーム'), 'からお知らせください（Googleフォームを使用しています）。')
+        : h('p', null, '報告フォームは公開時に設定します（準備中）。'), h('ul', null, h('li', null, 'フォームには、氏名・連絡先などの個人情報や、実在するシステムの具体的な脆弱性情報（URL・IPアドレス等）は書かないでください'), h('li', null, '送信された内容は、教材の改善と誤りの訂正のためだけに使います。返信が必要な場合のみ、任意で連絡先を書いてください')), SERVICE.threadsUrl ? h('p.muted.small', null, '告知・お知らせ：', externalLink(SERVICE.threadsUrl, '運営のThreads')) : null, h('a.btn.primary', { href: '#/' }, 'ホームへ'));
+}
+void ACHIEVEMENTS;
+
+return { rankingPage, shareUrl, drawCard, drawTrialCard, sharePage, factsPage, privacyPage };
+})();
+__m["content/questions.js"] = (() => {
+const single = (id, cat, diff, prompt, choices, answer, explain, extra = {}) => ({ id, cat, diff, type: 'single', prompt, choices, answer, explain, ...extra });
+const multi = (id, cat, diff, prompt, choices, answer, explain, extra = {}) => ({ id, cat, diff, type: 'multi', prompt, choices, answer, explain, ...extra });
+const order = (id, cat, diff, prompt, items, explain, extra = {}) => ({ id, cat, diff, type: 'order', prompt, order: items, explain, ...extra });
+const code = (id, cat, diff, prompt, lines, badLine, fixes, fixAnswer, explain, extra = {}) => ({ id, cat, diff, type: 'code', prompt, code: lines, badLine, fixes, fixAnswer, explain, ...extra });
+const QUESTIONS = [
+    // ───────── Webの仕組み ─────────
+    single('w1', 'web', 'easy', 'ブラウザとサーバーの関係として正しいものはどれ？', ['ブラウザがリクエストを送り、サーバーがレスポンスを返す', 'サーバーがブラウザにリクエストを送り、ブラウザがレスポンスを返す', 'ブラウザ同士が直接データを交換して画面を作る', 'サーバーは画面を持たないので、ブラウザとは通信しない'], 0, 'Webは「ブラウザ（クライアント）が頼む → サーバーが答える」の繰り返しです。頼む側がリクエスト、答える側がレスポンスです。'),
+    single('w2', 'web', 'easy', 'URLを入力してEnterキーを押したとき、最初に起きることはどれ？', ['ブラウザがWebサーバーへリクエストを送る', 'サーバーが利用者のスマホ画面を直接書き換える', 'データベースの中身が自動的に削除される', 'ブラウザが広告会社に代金を支払う'], 0, 'まずブラウザがサーバーに「このページをください」とリクエストを送ります。サーバーが利用者の端末を直接操作することはありません。'),
+    single('w3', 'web', 'normal', '「フロントエンド」と「バックエンド」の説明として最も適切なものはどれ？', ['フロントは利用者の画面側（ブラウザ上）、バックはサーバー側で動く処理', 'フロントはサーバー側、バックは利用者のブラウザ側', 'どちらも利用者のブラウザの中だけで動く', '違いはなく、同じものを別の呼び方で呼んでいるだけ'], 0, '見た目や操作（HTML/CSS/JavaScript）がフロント、注文処理・データ保存・認証などがバックです。目に見えない裏側（バック）の安全性が、サービス全体の安全性を左右します。'),
+    multi('w4', 'web', 'normal', '利用者のブラウザに送られてくるものを、すべて選んでください。', ['HTML', 'CSS', 'JavaScript', 'サーバー側プログラムのソースコード', 'データベースの管理者パスワード'], [0, 1, 2], 'ブラウザに届くのは、HTML・CSS・JavaScriptなど「表示と操作に必要なもの」です。サーバー側のコードやDBのパスワードは、通常ブラウザには送られません（送ってしまう設定ミスは重大な事故です）。'),
+    order('w5', 'web', 'normal', 'ページが表示されるまでの流れを、正しい順に並べてください。', ['ブラウザがリクエストを送る', 'Webサーバーがリクエストを受け取る', 'サーバー側のプログラムが処理して結果を作る', 'サーバーがレスポンス（HTML等）を返す', 'ブラウザが受け取って画面に表示する'], '「送る → 受ける → 処理する → 返す → 表示する」の順です。「処理する」の部分が、PHPなどのサーバー側プログラムの出番です。'),
+    single('w6', 'web', 'easy', 'HTTPステータスコード「500」が表すものはどれ？', ['サーバー側で内部エラーが起きた', 'ページが見つからない', 'リクエストが成功した', 'ログインが必要'], 0, '500は「サーバー内部エラー」です。404は「見つからない」、200は「成功」、401は「認証が必要」。サーバーの不調や不審なリクエストの痕跡を調べるとき、500の急増は手がかりの一つになります。'),
+    single('w7', 'web', 'hard', 'サーバー側のプログラムの不具合が「ブラウザからは見えない」のに重大な問題になり得るのはなぜ？', ['攻撃者が送るリクエストの内容を、サーバーが正しく処理できるかどうかは、画面の外側で決まるから', 'ブラウザに表示される広告が原因だから', 'HTMLの色指定が間違っているから', 'サーバーはどんなリクエストでも必ず正しく処理するから'], 0, 'リクエストは利用者（や攻撃者）が自由に作れます。サーバー内部の処理が想定外の入力に耐えられないと、画面には何も出なくても被害につながります。'),
+    // ───────── PHPの基礎 ─────────
+    single('p1', 'php', 'easy', 'PHPは主に何のために使われるプログラミング言語？', ['Webサーバー側でページや処理を動的に作る', 'ブラウザの文字の色を変える', 'スマホの電池を長持ちさせる', '画像編集ソフトの操作を録画する'], 0, 'PHPはサーバー側で動き、リクエストに応じてHTMLなどを生成するために広く使われています。'),
+    single('p2', 'php', 'easy', 'PHPのプログラムが実行される場所はどこ？', ['Webサーバー（サーバー側）', '利用者のブラウザの中', '利用者のスマホのカメラの中', 'インターネットの電線の中'], 0, 'PHPはサーバー側で実行され、結果（HTML）だけがブラウザに返ります。JavaScriptは主にブラウザ側で動く点が違います。'),
+    single('p3', 'php', 'normal', 'ブラウザで「ページのソースを表示」したとき、通常見えないものはどれ？', ['PHPのソースコードそのもの', 'HTMLのタグ', 'CSSの指定', 'ページに読み込まれたJavaScript'], 0, 'PHPはサーバー側で実行され、結果のHTMLだけが送られます。PHPのコードが丸ごと見えてしまうなら、設定に重大な問題があります。'),
+    single('p4', 'php', 'easy', 'Webページの「見た目（色・余白・レイアウト）」を整える役割を持つものはどれ？', ['CSS', 'HTML', 'PHP', 'SQL'], 0, 'HTMLは構造、CSSは見た目、JavaScriptはブラウザ上の動き、PHPはサーバー側の処理が主な役割です。'),
+    single('p5', 'php', 'normal', 'PHPのバージョンを更新する意味として、最も適切なものはどれ？', ['不具合の修正やセキュリティ修正を取り込み、安全に使い続けるため', '画面が派手になるため', '更新すると、すべてのバグが必ずなくなるため', '更新しても、攻撃への強さは変わらないため'], 0, '更新は修正を取り込むための作業です。ただし「最新なら絶対に安全」ではなく、更新後も動作確認や監視が必要です。'),
+    single('p6', 'php', 'normal', '次のうち、PHPで作られているソフトウェアの例として適切なものはどれ？', ['WordPress（ブログ・サイト作成ソフト）', 'Windowsのメモ帳', 'ブラウザのChrome本体', 'スマホの電卓アプリ'], 0, 'WordPressをはじめ、多くのWebサイト・Webサービスがサーバー側にPHPを使っています。利用者からはPHPが見えないため、運営側が把握していないことも起こり得ます。'),
+    single('p7', 'php', 'hard', 'サポートが終了したバージョンのPHPを使い続けるリスクとして適切なものはどれ？', ['新たな脆弱性が見つかっても、修正版が提供されない可能性がある', '動作が必ず遅くなる', '見た目が古くなるだけで、安全性とは無関係', 'サポート終了後は、脆弱性は見つからなくなる'], 0, '今回も、PHP 8.1以前には通常の修正版が提供されず、サポートされているバージョンへの移行が推奨されました（JPCERT/CC）。', { factIds: ['versions'], volatile: true }),
+    single('p8', 'php', 'normal', '「mod_php」や「PHP-FPM」とは何のこと？', ['Webサーバーと連携してPHPを動かす方式（実行方式）の名前', 'PHPで書かれたゲームの名前', 'PHPの文法の一つ', '利用者が使う検索エンジンの名前'], 0, 'どの方式でPHPを動かしているかで、同じ脆弱性でも悪用のしやすさが変わることがあります。自分の環境の実行方式を把握することが対応の第一歩です。', { factIds: ['runtime'] }),
+    // ───────── 脆弱性の基礎 ─────────
+    single('b1', 'vulnBasic', 'easy', '「脆弱性」の説明として最も適切なものはどれ？', ['ソフトウェアの欠陥のうち、攻撃に悪用されると安全性を損なう可能性があるもの', 'パソコンの見た目が古いこと', 'ネットの速度が遅いこと', 'パスワードを長く設定すること'], 0, '脆弱性は「悪用され得る弱点」です。存在しているだけでは被害は出ていませんが、放置すると攻撃の入口になります。'),
+    single('b2', 'vulnBasic', 'normal', '「バグ」と「脆弱性」の関係として正しいものはどれ？', ['すべてのバグが脆弱性とは限らず、安全性に影響するものが脆弱性になる', 'バグと脆弱性は完全に同じ意味', '脆弱性はバグとは無関係で、ハードウェアにしか存在しない', '脆弱性があるソフトは、必ず乗っ取られている'], 0, '表示崩れのようなバグは通常は安全性に関係しません。一方、不正な実行や情報漏えいにつながる欠陥は脆弱性として扱われます。'),
+    single('b3', 'vulnBasic', 'normal', '「CVE-2026-109618」のような「CVE番号」の説明として正しいものはどれ？', ['公開された脆弱性を識別するための共通の番号', '脆弱性の深刻度を表す点数', '攻撃者の名前', '修正プログラムのファイル名'], 0, 'CVEは「どの脆弱性の話か」を世界共通で指すための識別番号です。深刻度を表す点数はCVSSで、別のものです。'),
+    single('b4', 'vulnBasic', 'hard', 'CVSSスコア（例：9.2）について正しい説明はどれ？', ['脆弱性の深刻度を数値化した目安で、評価者や版によって数値が異なることがある', '実際に発生した被害額', '攻撃者の人数', 'ソフトウェアの価格'], 0, '今回も、CNAはCVSS v4.0で9.2、NVDはv3.1で9.8、Red Hatはv3.1で8.1と、評価者・版で数値が異なると報じられています。数値は目安であり、自分の環境での危険度は別に考える必要があります。', { factIds: ['severity'], volatile: true }),
+    single('b5', 'vulnBasic', 'normal', '「リモートコード実行（RCE）」の説明として最も適切なものはどれ？', ['ネットワーク越しに、サーバー上で攻撃者の意図した処理を実行されてしまう可能性', '利用者が自分でプログラムを書いて実行すること', 'リモート会議でコードを共有すること', 'ブラウザの拡張機能を入れること'], 0, 'RCEが成立すると、被害者のサーバー上で意図しない処理が動かされる可能性があり、情報の窃取・改ざん・踏み台化などにつながり得ます。'),
+    single('b6', 'vulnBasic', 'hard', '「認証なしで悪用され得る」脆弱性が特に警戒される理由として最も適切なものはどれ？', ['ログインしていない第三者でもネットワーク上から到達でき、攻撃の対象が広がるため', 'ログイン画面が必ず壊れるため', '利用者のパスワードが自動的に変更されるため', '認証がある場合は、脆弱性は存在できないため'], 0, '悪用にアカウントが必要なら攻撃者は絞られますが、認証不要だと不特定多数が試せます。だから緊急度が上がります。', { factIds: ['impact'] }),
+    single('b7', 'vulnBasic', 'normal', '「脆弱性が存在すること」と「攻撃が成功したこと」の関係として正しいものはどれ？', ['脆弱性があっても、攻撃が成功したとは限らない（別々に確認が必要）', '脆弱性があれば、必ず攻撃は成功している', '攻撃が試みられたなら、必ず成功している', '修正版を公開した時点で、すべてのサイトの安全が確定する'], 0, '「ある」「試された」「成功した」「被害が出た」は別の段階です。ニュースを読むときも、どの段階の話かを分けて確認しましょう。'),
+    // ───────── 今回の脆弱性に関する事実 ─────────
+    single('f1', 'vulnFact', 'normal', 'CVE-2026-109618について、公開情報が説明している原因の概要として最も適切なものはどれ？', ['メモリ不足時の処理の途中終了で状態が不整合になり、後片付けでメモリが壊れる問題', '各サイトのSQL文の組み立て方が間違っている問題', 'パスワードが弱いことによる不正ログイン', 'PHPの文法そのものが危険な設計であること'], 0, '公開情報（Rapid7・Red Hat等）は、PHP本体のメモリ不足時の処理に不備があると説明しています。アプリのコードの書き方の問題ではありません。', { factIds: ['ids', 'cause'], volatile: true }),
+    single('f2', 'vulnFact', 'normal', 'CVE-2026-109619について、公開情報が説明している原因の概要として最も適切なものはどれ？', ['リクエスト間で残った古い状態が解放済みメモリを指し、後続のリクエストで使われる問題', '画像の圧縮形式の問題', 'メール送信機能の宛先の確認漏れ', 'ブラウザの拡張機能の脆弱性'], 0, '使い回されるワーカーに前のリクエストの状態が残り、解放済みメモリを後続の処理が参照する「解放後使用」型の問題と説明されています。', { factIds: ['ids'], volatile: true }),
+    single('f3', 'vulnFact', 'normal', 'PHP 8.4系で、この問題が修正された最初のバージョンはどれ？（2026-10-23時点の公表情報）', ['8.4.27', '8.4.1', '8.4.26', '8.3.36'], 0, '8.2系は8.2.35、8.3系は8.3.36、8.4系は8.4.27、8.5系は8.5.12で修正されました。公式情報が更新される可能性があるため、実際の対応時は必ず最新の公式情報を確認してください。', { factIds: ['versions'], volatile: true }),
+    single('f4', 'vulnFact', 'normal', 'PHP 8.1以前について、公表情報から言えることはどれ？', ['通常の修正版は提供されず、7.4・8.0・8.1には最小限の緩和策のみ。サポート中の版への移行が推奨される', '8.1以前にも、同じ形で修正版が提供された', '8.1以前は、この問題の影響を一切受けない', '8.1以前は、自動的に最新版へ更新される'], 0, 'JPCERT/CC注意喚起による整理です。サポート終了版を使い続ける環境は、特に早い対応が必要です。', { factIds: ['versions'], volatile: true }),
+    single('f5', 'vulnFact', 'normal', '今回の問題の原因として、公開情報にもっとも近いものはどれ？', ['PHP本体（処理系）の実装上の不備で、PHP本体の更新で対処する', 'PHPを使うすべてのサイトの開発者が、安全でないコードを書いたこと', 'PHPという言語を使うこと自体が禁止されたこと', 'ユーザーが弱いパスワードを使っていたこと'], 0, 'PHPという言語の設計論や、各アプリの実装ミスと混同しないことが大切です。今回は「処理系の不備」で、サイト運営者はPHP本体（または提供元のパッケージ）の更新が必要になります。', { factIds: ['cause'] }),
+    single('f6', 'vulnFact', 'hard', '「PHP Groupが修正版を公開した」ことの意味として適切なものはどれ？', ['修正版が用意されただけで、各環境での更新・再起動が終わるまで、各サイトは安全とは限らない', '世界中のすべてのサイトが自動的に安全になった', '以後、PHPに脆弱性は見つからなくなった', '修正版を入れなくても、設定変更だけで完全に防げる'], 0, '公開と適用は別です。ホスティング会社・OSのパッケージ提供元・自社運用など、各所で更新が行われる必要があります。', { factIds: ['rollout', 'mitigation'] }),
+    multi('f7', 'vulnFact', 'normal', 'JPCERT/CC注意喚起が確認を求めている「攻撃の痕跡」をすべて選んでください。', ['異常に長い、または異常な形式のPHPSESSID Cookie', '不審なmultipart/form-dataリクエスト', 'PHPワーカーの予期せぬ異常終了や頻繁な再起動', 'サイトのアクセス数が増えたので、すぐに安全と判断できる', 'ブラウザの背景色が変わった'], [0, 1, 2], '見るべきは、異常なCookie・不審なリクエスト・メモリ関連エラーやHTTP 500・ワーカーの異常終了などです。痕跡がなくても攻撃を受けていないとは断定できません。', { factIds: ['afterpatch'] }),
+    single('f8', 'vulnFact', 'hard', '「攻撃は観測されたか」についての説明として、最も適切なものはどれ？', ['民間事業者から試行・悪用の観測報告がある一方、観測していない主体もあり、被害の全体像は未確認', '公式に、被害はゼロと確認された', '日本国内のすべてのサイトが侵害されたと確認された', '攻撃はまったく試みられていない'], 0, '観測主体・時点によって記載が異なります。「試行があった」ことと「成功した」ことは別で、実被害の全体像は未確認です。断定せずに、出典と時点を添えて伝えましょう。', { factIds: ['exploit', 'damage'], volatile: true }),
+    single('f9', 'vulnFact', 'hard', '「暫定措置（設定変更など）」についての説明として適切なものはどれ？', ['特定の攻撃経路を減らすだけで、修正版への更新の代わりにはならない', '設定変更だけで完全に問題が解決する', '暫定措置は、何もしないよりも悪い', '暫定措置を入れたら、更新は永久に不要になる'], 0, 'JPCERT/CC注意喚起でも、緩和策は特定の攻撃経路にのみ対処するもので根本的な解決にはならないとされています。暫定措置は時間稼ぎで、更新の計画とセットで考えます。', { factIds: ['mitigation'] }),
+    single('f10', 'vulnFact', 'normal', '多くの組織がサービスを一時停止した理由として、公開情報から言えることはどれ？', ['予防的措置として停止・緊急メンテナンスを行った例が報じられている（個別の理由は各組織の発表を確認する）', '全組織が、実際に侵害されたことを認めたから', '法律で停止が義務付けられたから', '停止した組織は、すべて同じ理由で停止した'], 0, '「停止＝侵害された」ではありません。更新・点検が済むまで入口を閉じる予防的措置の例が多いと報じられていますが、理由は組織ごとに確認が必要です。', { factIds: ['suspend'], volatile: true }),
+    single('f11', 'vulnFact', 'hard', 'Rapid7の説明で、最もリスクが高いとされた実行方式はどれ？', ['Apacheのmod_php', 'どの方式でも同じで、差はない', 'PHP-FPMのみ', 'ブラウザ上のJavaScript'], 0, 'Rapid7はmod_phpが最も高リスクで、PHP-FPMには追加の前提条件があると説明しています。ただしFPMでも更新は必要です。', { factIds: ['runtime'], volatile: true }),
+    single('f12', 'vulnFact', 'normal', '公表前日までにIPAが呼びかけた「事前準備」として適切なものはどれ？', ['PHPを利用している自組織のシステムの棚卸しと、修正版をすぐ適用できる準備', '公表されるまでサイトをすべて閉鎖する', 'PHPを使うことをやめる', '何もせずSNSで様子を見る'], 0, 'IPAの事前告知は、PHP利用の棚卸し（＝自分たちが使っているシステムやソフトを洗い出して一覧にし、どこでPHPが使われ、どのバージョンかを把握すること）・製品の提供元情報の確認・修正版適用の準備を求めていました。製品の内部にPHPが使われていて把握しづらい場合がある点も注意されています。', { factIds: ['event'] }),
+    single('f13', 'vulnFact', 'easy', '8.3系で「影響を受ける」とされたのは、どのバージョン？', ['8.3.36より前', '8.3.36以降すべて', '8.3系は影響なし', '8.3.1だけ'], 0, '8.3系は8.3.36未満が影響を受け、8.3.36で修正されています。「〇〇未満」の読み方に注意しましょう。', { factIds: ['versions'], volatile: true }),
+    single('f14', 'vulnFact', 'normal', '「悪用された場合に起こり得ること」（想定）として、JPCERT/CC注意喚起が示している内容はどれ？', ['PHPの実行プロセスの権限で、任意のコードを実行される可能性', '利用者のパスワードが自動的に公開される（確認済みの事実）', '日本中のすべてのサイトが停止する（確認済みの事実）', 'ブラウザが壊れる'], 0, '「起こり得る（想定）」と「実際に起きた被害」は区別します。実被害の規模は未確認です。', { factIds: ['impact', 'damage'] }),
+    single('f15', 'vulnFact', 'hard', '修正版が出たときの「最優先の対応」として最も適切なものはどれ？', ['自組織でPHPを使っている場所（バージョン・実行方式）を把握し、修正版へ更新する。更新できない間は暫定措置と監視を行う', 'まず原因が判明するまで何もしない', '被害報告が出るまで更新を遅らせる', 'ネットで見つけた攻撃コードで自分のサイトを試す'], 0, '把握（棚卸し）→更新（または提供元の修正版）→確認、が基本線です。自分のサイトでも、許可のない攻撃コードの実行は行いません。', { factIds: ['mitigation'] }),
+    // ───────── 安全なコードの考え方 ─────────
+    code('c1', 'secureCode', 'normal', '入力値の検証不足：架空の通販サイトの注文処理です。問題の起点となる行を選び、安全な修正を選んでください。', ['$qty   = $_POST[\'quantity\'];', '$price = 1200;', '$total = $price * $qty;', 'saveOrder($userId, $total);'], 0, ['整数かつ範囲内（例：1〜10）かをサーバー側で検証し、不正なら400で処理を止める', '前後の空白を取り除くだけにする', 'ブラウザ側（JavaScript）の入力チェックだけにする'], 0, '入力はサーバー側で「型・範囲・形式」を検証します。ブラウザ側のチェックは利便性のためのもので、迂回できるため防御にはなりません。マイナスの数量や文字列のまま計算すると、金額の不正や障害の原因になります。'),
+    code('c2', 'secureCode', 'normal', 'SQLインジェクション：商品検索の処理です。問題の行を選び、安全な修正を選んでください。', ['$id  = $_GET[\'id\'];', '$sql = "SELECT * FROM items WHERE id = " . $id;', '$rows = $db->query($sql);', 'render($rows);'], 1, ['プレースホルダ（パラメータ化クエリ）を使い、値をSQLとは別に渡す', 'エラーメッセージを画面に表示しないようにする', '入力文字列からスペースを取り除く'], 0, '利用者の入力をSQL文字列に連結すると、入力がSQLの一部として解釈される危険があります。値は「プレースホルダ」で別に渡すのが基本です。エラー非表示は対処にならず、部分的な文字除去も確実ではありません。'),
+    code('c3', 'secureCode', 'normal', 'クロスサイトスクリプティング（XSS）：コメント表示の処理です。問題の行を選び、安全な修正を選んでください。', ['$comment = $_POST[\'comment\'];', 'saveComment($comment);', 'echo "<p>" . $comment . "</p>";', '// 保存は完了'], 2, ['表示するときに htmlspecialchars で出力先に合わせてエスケープする', '保存する前に「<」の文字を全部消す', 'コメントの文字数を制限するだけにする'], 0, '入力された文字列をそのままHTMLに出すと、ブラウザがスクリプトとして解釈する危険があります。対策は「出力時に、出力先に合わせてエスケープ」することが基本です。'),
+    code('c4', 'secureCode', 'hard', 'アクセス制御の不備：注文詳細ページの処理です。問題の行を選び、安全な修正を選んでください。', ['$orderId = $_GET[\'order\'];', '$order   = findOrder($orderId);', '// ログインしているかだけを確認', 'if ($isLoggedIn) { showOrder($order); }'], 3, ['ログイン確認に加え、その注文が本人のものか（所有者）をサーバー側で確認し、違えば403にする', '注文番号を長くて推測しにくい文字列にするだけにする', 'ログイン画面のデザインを強化する'], 0, '「誰か（認証）」の確認だけでは、「その人にそのデータを見る権限があるか（認可）」が確認できていません。推測しにくいIDは補助にはなりますが、認可チェックの代わりにはなりません。'),
+    code('c5', 'secureCode', 'hard', '安全でないファイル処理：プロフィール画像のアップロード処理です。問題の行を選び、安全な修正を選んでください。', ['$tmp  = $_FILES[\'photo\'][\'tmp_name\'];', '$name = $_FILES[\'photo\'][\'name\'];', '$dest = "/var/www/html/uploads/" . $name;', 'move_uploaded_file($tmp, $dest);'], 2, ['許可する形式を限定して検証し、ファイル名はサーバー側で生成、保存先はWeb公開されない場所にする', '拡張子が「.php」のときだけ拒否する', 'ファイル名の長さを制限するだけにする'], 0, '利用者が付けたファイル名で、Webから実行・参照できる場所に保存すると危険です。許可リストでの形式検証、サーバー生成のファイル名、公開されない保存先、が基本です。一部の拡張子だけを拒否する方式は抜けが出やすいです。'),
+    single('s1', 'secureCode', 'normal', '「認証」と「認可」の違いとして正しいものはどれ？', ['認証は「あなたは誰か」の確認、認可は「その操作・データを許可されているか」の確認', '認証と認可は同じ意味', '認証は管理者だけが行う', '認可はログイン前に必ず終わっている'], 0, 'ログインできること（認証）と、他人のデータを見られないこと（認可）は別の話です。'),
+    single('s2', 'secureCode', 'normal', '「最小権限の原則」の説明として最も適切なものはどれ？', ['プログラムや利用者には、仕事に必要な最小限の権限だけを与える', 'すべてのプログラムに管理者権限を与える', '権限は、一度与えたら見直さない', 'パスワードは最小の文字数にする'], 0, '万一乗っ取られたときの被害範囲を小さくできます。今回のように「PHPの実行プロセスの権限で」コードが動かされ得る場合も、そのプロセスの権限が小さいほど影響を抑えやすくなります。'),
+    single('s3', 'secureCode', 'normal', 'ログと監視の役割として、最も適切なものはどれ？', ['異常に気づく・原因を調べる・影響範囲を確定するための手がかりを残す', '画面を派手にする', 'ログは何も役に立たない', 'ログは攻撃を完全に防ぐ'], 0, 'ログは防御そのものではありませんが、早期発見と事後調査に不可欠です。ログがない=攻撃がなかった、とは言えません。'),
+    single('s4', 'secureCode', 'normal', '入力値のチェックを「ブラウザ側のJavaScriptだけ」で行うことの問題点は？', ['攻撃者はブラウザを経由せずリクエストを直接作れるため、サーバー側でも検証が必要', '問題はない', 'JavaScriptは使えないため', 'サーバー側は検証をしてはいけないため'], 0, 'ブラウザ側のチェックは親切のためで、安全のための最終防衛線はサーバー側の検証です。'),
+    single('s5', 'secureCode', 'hard', '今回のPHPの脆弱性と、SQLインジェクションやXSSの関係として正しいものはどれ？', ['別の種類の問題。今回はPHP本体の更新が必要で、SQLインジェクションやXSSはアプリのコードで防ぐ', '同じ原因の問題で、同じ方法で防げる', '今回の脆弱性が、SQLインジェクションとXSSを引き起こした', 'SQLインジェクションやXSSは、PHPを更新すれば必ず消える'], 0, 'どちらも大切ですが、別々の対策が必要です。今回の問題を「すべてのWeb攻撃の原因」のように捉えないようにしましょう。', { factIds: ['cause'] }),
+    multi('s6', 'secureCode', 'normal', '安全な処理の例を、すべて選んでください。', ['SQLにはプレースホルダで値を渡す', 'HTMLに出力するときはエスケープする', '入力値をそのままSQL文字列に連結する', 'パスワードやAPIキーをソースコードに直接書いて公開リポジトリに置く'], [0, 1], '連結や秘密情報の直書きは典型的な危険例です。秘密情報は環境変数や専用の仕組みで管理し、リポジトリに含めません。'),
+    // ───────── パッチ適用と緊急対応 ─────────
+    single('pa1', 'patch', 'easy', 'セキュリティパッチ（修正プログラム）とは？', ['脆弱性を修正するための更新', '画面のデザインを変える更新', 'ゲームのレベルを上げる機能', '広告を表示するプログラム'], 0, 'セキュリティパッチは、見つかった脆弱性をふさぐための更新です。'),
+    order('pa2', 'patch', 'normal', '更新作業の流れとして適切な順に並べてください。', ['影響範囲を確認する（使用中のバージョン・実行方式）', 'バックアップを取り、戻し方を決める', 'テスト環境で更新して動作を検証する', '本番環境に適用する', '動作確認と、ログの監視を行う'], '「確認 → 備える → 試す → 適用 → 確認・監視」。緊急時でも、バックアップと動作確認を飛ばすと、別の障害を招く恐れがあります。'),
+    single('pa3', 'patch', 'normal', '更新の前に確認しておくべきこととして、最も適切なものはどれ？', ['現在のバージョン、実行方式、依存するソフトとの互換性、戻し手順', '更新対象のソフトの名前だけ', 'SNSの反応の数', '利用者の年齢'], 0, '互換性や戻し手順を確認しておかないと、更新による障害が起きたときに復旧できなくなります。'),
+    single('pa4', 'patch', 'hard', 'すぐに更新できないときの考え方として、最も適切なものはどれ？', ['暫定措置（公開範囲の縮小・設定変更・WAF等）と監視強化を行い、期限を決めて更新計画を立てる', '暫定措置を入れたので、更新はずっとしなくてよい', '何もせずに様子を見る', 'とにかく何も確認せずに更新する'], 0, '暫定措置は時間稼ぎです。更新までの期限と責任者を決め、監視を強めて対応します。', { factIds: ['mitigation'] }),
+    single('pa5', 'patch', 'hard', 'サイトを一時停止する判断について、最も適切な説明はどれ？', ['リスク（悪用の可能性・影響の大きさ）と停止による影響を比較し、状況に応じて決める。停止は常に正解でも不正解でもない', '停止は常に正しい', '停止は常に間違い', '停止は他社の判断をまねれば十分'], 0, '更新までの間に被害を受けるリスクが大きいときは、入口を閉じる判断もあります。一方、停止にも事業・利用者への影響があります。根拠と再開条件を明確にして決めます。', { factIds: ['suspend'] }),
+    single('pa6', 'patch', 'normal', 'サービスを再開する前に行うべきこととして適切なものはどれ？', ['修正後のバージョンの確認、主要機能の動作確認、ログの確認', 'すぐに公開し、問題が出たら考える', '利用者には何も伝えない', '古いバージョンへ戻して終わりにする'], 0, '再開前に「直っているか」「動くか」「異常がないか」を確認し、必要なら利用者へ説明します。'),
+    multi('pa7', 'patch', 'hard', '修正版を適用した後に確認すべきことを、すべて選んでください。', ['実際に動いているPHPのバージョンが修正版になっている', 'Webサーバー／PHPのプロセスを再起動し、新しいものが動いている', '主要機能（ログイン・注文など）が正常に動く', 'ログに異常が出ていない', 'PHP公式サイトのデザインが変わったか'], [0, 1, 2, 3], '更新したつもりでも、再起動していなかったり別のPHPが動いていたりすることがあります。「実際に動いているもの」を確認しましょう。'),
+    single('pa8', 'patch', 'normal', 'OSやホスティング会社が提供しているPHPを使っている場合の対応として適切なものはどれ？', ['提供元の情報で、今回の2件の修正が両方含まれているかを確認し、提供元の手順で更新する', 'PHP公式のバージョン番号と完全一致しないなら安全だ、と判断する', '提供元に任せきりで、自分は何も確認しない', 'すべてを自分でソースからビルドし直す'], 0, 'ベンダー提供のパッケージは、バージョン番号の付け方が公式と異なる場合があります。提供元の公表情報で修正の有無を確認します。自分の責任範囲（アプリや設定）も確認しましょう。', { factIds: ['versions'] }),
+    // ───────── フィッシング対策 ─────────
+    single('ph1', 'phishing', 'normal', 'メールの差出人表示が「○○銀行」となっているとき、まず確認すべきことは？', ['実際のメールアドレスのドメインと、リンク先のドメイン', '件名の文字の大きさ', '表示名が丁寧かどうか', '絵文字が使われているか'], 0, '表示名は簡単に偽装できます。ドメインとリンク先を確認し、不安な場合はメールのリンクではなく公式アプリやブックマークから確認します。'),
+    single('ph2', 'phishing', 'normal', '不審かもしれないメールのリンクを開く前にできることは？', ['リンク先のドメインを確認し、公式のブックマークやアプリから直接確認する', 'すぐクリックして確かめる', '添付ファイルを開いてから判断する', '返信して本物か聞く'], 0, '安全な確認方法は「メール内のリンクを使わず、自分で公式サイトを開く」ことです。'),
+    single('ph3', 'phishing', 'easy', 'パスワードの使い回しが危険な理由は？', ['1つのサービスから流出すると、他のサービスにも不正ログインされる恐れがあるから', 'パスワードが長くなるから', '覚えるのが簡単になるから', '使い回しても問題はない'], 0, '流出したID・パスワードは、他のサービスで試されます（リスト型攻撃）。サービスごとに別のパスワードにしましょう。パスワードマネージャーも有効です。'),
+    single('ph4', 'phishing', 'normal', '多要素認証（MFA）の説明として最も適切なものはどれ？', ['パスワードに加えて、別の要素（所持しているアプリやキーなど）でも本人確認する仕組み', 'パスワードを2回入力すること', '複数の人で同じアカウントを使うこと', 'パスワードを紙に書くこと'], 0, 'パスワードが漏れても、別の要素がなければログインされにくくなります。ただし万能ではなく、偽サイトで認証コードを入力させる手口もあるため、サイトの確認は必要です。'),
+    single('ph5', 'phishing', 'normal', 'ブラウザの鍵マーク（HTTPS）が付いていれば、そのサイトは安全だと言える？', ['言えない。通信が暗号化されているだけで、運営者が信頼できるとは限らない', '言える。鍵マークは安全の証明だから', '言える。政府が認めているから', '鍵マークは偽装できないから安全'], 0, '偽サイトでもHTTPSは使えます。ドメインが正しいか、どこから来たリンクかを確認します。'),
+    single('ph6', 'phishing', 'hard', '「24時間以内に確認しないとアカウントを停止します」というメールの特徴として、最も適切な説明は？', ['不安と焦りを与えて、考える時間を奪う典型的な手口。公式アプリやサイトから自分で確認する', '本物の通知なので、すぐリンクを開くべき', '期限が書いてあるメールは必ず安全', '返信して本物かを聞くのが最も安全'], 0, '「急がせる」「不安を煽る」は典型的な特徴です。ただし本物の通知でも期限が書かれることはあるため、内容の真偽は「メール内のリンク以外」の経路で確認します。'),
+    multi('ph7', 'phishing', 'normal', '不審なメールを受け取ったときの適切な対応を、すべて選んでください。', ['リンクや添付ファイルを開かない', '公式サイトやアプリを自分で開いて確認する', '必要に応じて、組織の担当窓口や公式の窓口へ報告する', 'メールに書かれた番号に電話して、個人情報を伝える'], [0, 1, 2], 'メールに書かれた連絡先は信用せず、公式に公開されている窓口を使います。'),
+    single('ph8', 'phishing', 'hard', '今回のPHPの脆弱性に便乗した「今すぐログインして更新してください」というメールが届いたら？', ['リンクは開かず、ニュースなどは公式の発表（PHP Group・IPA・JPCERT/CC・サービス提供元）で確認する', 'ニュースになっているから本物だと判断して、リンクを開く', '添付ファイルを開いて内容を確認する', '友達にすぐ転送する'], 0, '話題になった事件は、詐欺メールの口実に使われやすいです。公式情報は、自分で公式サイトを開いて確認します。'),
+    single('ph9', 'phishing', 'easy', '端末やアプリを最新の状態に更新しておく主な理由は？', ['見つかった脆弱性の修正を取り込むため', '画面の色が変わるため', '通信が必ず速くなるため', 'アプリの名前が変わるため'], 0, '利用者側の端末・ブラウザ・アプリも、更新が最も基本的な対策のひとつです。'),
+    // ───────── インシデント対応の判断 ─────────
+    single('i1', 'incident', 'normal', '「不審なアクセスがあった」という通知を受けた直後の行動として、最も適切なものは？', ['状況を把握し、証拠（ログ）を保全して、責任者に報告する', 'すぐにサーバーを再起動し、ログを消してすっきりさせる', '誰にも言わずに様子を見る', 'SNSに状況を投稿して意見を募る'], 0, '再起動やログ削除は、原因調査に必要な痕跡を失うことがあります。まず状況の把握と証拠の保全、そして報告です。'),
+    order('i2', 'incident', 'hard', 'インシデント対応の基本的な流れを、適切な順に並べてください。', ['検知・報告', '証拠の保全', '影響範囲の調査', '封じ込め（隔離・遮断）', '復旧', '再発防止と説明'], '実際の現場では行き来しますが、基本は「見つけて伝える → 証拠を守る → 範囲を調べる → 広がりを止める → 戻す → 学んで説明する」です。'),
+    single('i3', 'incident', 'normal', '自社システムのPHPバージョンが「分からない」とき、最も適切な行動は？', ['実際に確認して棚卸しする（サーバー・実行方式・パッケージの提供元）', '「たぶん大丈夫」と思って対応しない', '他社と同じだと仮定する', '分かるまで何も報告しない'], 0, '推測で「大丈夫」とするのが最も危険です。確認できていない部分は「未確認」として、確認作業を進めながら関係者に共有します。'),
+    single('i4', 'incident', 'hard', '利用者への説明として最も適切なものはどれ？', ['分かっている事実・まだ分からないこと・利用者にお願いしたい行動・次の報告予定を区別して伝える', '「問題ありません」と言い切る', '何も説明しない', '不安を煽るため、最悪の場合を断定的に伝える'], 0, '確認できていないことを断定しない一方、隠さずに現状を伝えます。次の報告時刻を示すと、利用者の不安も減らせます。'),
+    single('i5', 'incident', 'normal', '「ログに攻撃の痕跡が見つからなかった」場合、どう考えるべき？', ['攻撃を受けていないとは断定できない。ログの範囲・記録の仕組みの限界も踏まえて判断する', '完全に安全だと断定する', 'ログは見る必要がない', '以後は、監視をやめてよい'], 0, 'JPCERT/CC注意喚起も、痕跡が見つからなくても攻撃を受けていないと断定できないとしています。', { factIds: ['afterpatch'] }),
+    single('i6', 'incident', 'normal', '責任者への報告のタイミングと内容として適切なものは？', ['早めに、確認できた事実と未確認の事項を分けて伝える', '完全に原因が分かってから報告する', '都合のよい情報だけを選んで報告する', '報告せず、自分だけで解決する'], 0, '早い報告と、事実／推測の区別がチームの判断を助けます。'),
+    multi('i7', 'incident', 'hard', '侵害が疑われる場合の対応として、JPCERT/CC注意喚起に沿うものをすべて選んでください。', ['関連するログなどの証拠を保全する', '影響範囲を調査する', '該当システムを隔離する', '調査の前に、ログをすべて削除する'], [0, 1, 2], '証拠の保全、影響範囲の調査、隔離が基本です。ログ削除は調査を困難にします。', { factIds: ['afterpatch'] }),
+    single('i8', 'incident', 'normal', 'ホスティング会社のサービスを使っている場合の、運営者としての適切な行動は？', ['提供元の対応状況（更新済みか・必要な作業はあるか）を確認し、自分の責任範囲（アプリや設定）も確認する', 'すべて提供元の責任なので何も確認しない', '提供元の発表を待たずにサービスを解約する', '提供元に何度も同じ問い合わせをして対応を急がせる'], 0, '責任分界を理解し、提供元の公表情報を確認しつつ、自分で管理しているアプリ・設定・データは自分で確認します。'),
+];
+// ───────── コードレビュー問題の初心者向けヒント（各行の意味・注目点） ─────────
+// PHPを知らなくても読めるよう、1行ずつ平易な日本語で説明する。答えそのものは書かない。
+const CODE_AIDS = {
+    c1: {
+        clue: '「利用者が自由に送れる値」を、確かめずに使い始めている行はどこでしょう？',
+        lineNotes: [
+            '$qty は「数量」を入れておく箱（変数）。$_POST[\'quantity\'] は、注文フォームから送られてきた数量です。フォームの中身は、利用者が自由に書き換えて送れます。',
+            '$price という箱に、価格 1200 を入れています。',
+            '価格×数量で、合計金額を計算しています（* はかけ算）。',
+            '計算した合計金額を、注文として保存します。',
+        ],
+    },
+    c2: {
+        clue: 'データベースへの「命令文」を作っている行に注目。利用者の入力が、命令の中に直接入り込んでいませんか？',
+        lineNotes: [
+            'URLの「?id=」の後ろの値を受け取って、$id の箱に入れています。この値も、利用者が自由に入力できます。',
+            'データベースへの命令文（SQL）を作っています。「.」は文字をつなげる記号。命令文の途中に、受け取った値をそのまま貼り付けています。',
+            '作った命令文をデータベースに実行させ、結果を受け取ります。',
+            '結果を画面に表示します。',
+        ],
+    },
+    c3: {
+        clue: '利用者が書いた文字を、そのまま画面（HTML）に出している行はどこでしょう？',
+        lineNotes: [
+            'コメント欄に書かれた文字を受け取って、$comment の箱に入れています。',
+            'そのコメントを保存します。',
+            'echo は「画面に出す」命令。<p>…</p> はHTMLの「段落」の目印で、その中に、受け取った文字をそのまま入れています。',
+            '「//」で始まる行は、人が読むためのメモです（実行されません）。',
+        ],
+    },
+    c4: {
+        clue: '「ログインしているか」だけで、そのデータを見せてよい理由になるでしょうか？他の人の注文番号を入れたら、どうなるでしょう？',
+        lineNotes: [
+            'URLで指定された注文番号を受け取ります。番号は、利用者が自由に書き換えられます。',
+            'その番号の注文データを探して、$order に入れます。',
+            '「//」の行はメモです（実行されません）。',
+            '「もしログインしていれば（if）」注文を表示します。ただし、その注文が本人のものかどうかは、ここでは見ていません。',
+        ],
+    },
+    c5: {
+        clue: '利用者が決めた名前を、Webから見られる場所の保存先に、そのまま使っていませんか？',
+        lineNotes: [
+            '送られてきたファイルが、一時的に置かれている場所です。',
+            '送った人が付けた、元のファイル名です。利用者が自由に決められます。',
+            '保存先を決めています。「/var/www/html/uploads/」はWebで公開されるフォルダで、その後ろに、利用者が付けた名前をつなげています。',
+            '一時置き場から、決めた保存先へファイルを移して保存します。',
+        ],
+    },
+};
+for (const q of QUESTIONS)
+    if (CODE_AIDS[q.id])
+        Object.assign(q, CODE_AIDS[q.id]);
+const Q_MAP = Object.fromEntries(QUESTIONS.map((q) => [q.id, q]));
+
+return { QUESTIONS, Q_MAP };
+})();
+__m["content/activities.js"] = (() => {
+// 体験型アクティビティのデータ（すべて架空のサービス・架空のデータ。実在のサイトへは一切接続しない）。
+const FLOW_STAGE0 = {
+    title: 'ミライ通販にアクセスすると、裏側で何が起きる？',
+    actionLabel: '「ミライ通販」を開く',
+    nodes: [
+        { icon: '📱', name: 'あなたのブラウザ', short: 'URLを入力してEnter', detail: 'あなたがURLを入力すると、ブラウザは「このページをください」というリクエストを作ります。ブラウザは“頼む側”（クライアント）です。' },
+        { icon: '🧭', name: '住所の検索（DNS）', short: '名前から住所を調べる', detail: '「miraishop.example」のような名前から、サーバーの住所（IPアドレス）を調べます。電話帳のようなものです。（教材用の架空のドメインです）' },
+        { icon: '🖥️', name: 'Webサーバー', short: 'リクエストを受け取る', detail: 'リクエストを最初に受け取るのがWebサーバーです。静かな受付係のように、届いたリクエストを内容に応じてアプリへ渡します。' },
+        { icon: '⚙️', name: 'アプリ（PHPなど）＋データベース', short: '裏側で処理する', detail: '商品データを取り出したり、ログインを確認したりする“裏側の処理”です。PHPなどのプログラムがここで動きます。利用者の目には見えませんが、安全性の中心になる部分です。' },
+        { icon: '📄', name: 'レスポンス（HTML）', short: '結果を返す', detail: '処理の結果は、HTMLなどの形でブラウザへ返されます。ここで返るのは“結果”であり、サーバー側のプログラム自体ではありません。' },
+        { icon: '🖼️', name: 'ブラウザが画面に表示', short: 'ページが見える', detail: 'ブラウザがHTML・CSS・JavaScriptを読み取り、ページとして描きます。あなたが見ているのは、裏側の処理の“結果”です。' },
+    ],
+};
+const FLOW_STAGE1 = {
+    title: '「さくら動画」でおすすめを見るとき、PHPはどこで動く？',
+    actionLabel: '「おすすめを見る」を押す',
+    nodes: [
+        { icon: '👆', name: '利用者の操作', short: 'ボタンを押す', detail: '利用者が「おすすめを見る」を押します。ここまではブラウザ（利用者の端末）の中の出来事です。' },
+        { icon: '📨', name: 'リクエスト', short: '?user=はな を送る', detail: 'ブラウザは「はなさん用のおすすめをください」というリクエストをサーバーへ送ります。この内容は利用者が自由に変えられます。だからサーバー側での検証が重要です。' },
+        { icon: '🐘', name: 'サーバーでPHPが実行される', short: 'PHPのコードが動く', detail: 'PHPはサーバーの中で動きます。動画の一覧をデータベースから取得するなどの処理をします。このコードは利用者の端末には送られません。' },
+        { icon: '🧱', name: 'HTMLが生成される', short: '結果をHTMLにする', detail: 'PHPは処理の結果を使ってHTMLを組み立てます。完成した“HTMLだけ”がブラウザへ返されます。' },
+        { icon: '🖼️', name: 'ブラウザが表示', short: 'ページが見える', detail: '利用者の画面には完成したページだけが表示されます。ページのソースを見てもPHPのコードは見えません。' },
+    ],
+};
+const CODE_STAGE1 = [
+    { code: '<?php', explain: '「ここからPHPのプログラムです」という目印。サーバーがこの部分を実行します。' },
+    { code: "$user = $_GET['user'] ?? 'ゲスト';", explain: 'リクエストで送られてきた user の値を取り出します。送られていなければ「ゲスト」を使います。※この値は利用者が自由に変えられる“外部からの入力”です。' },
+    { code: '$videos = loadVideos($user);', explain: 'その人向けの動画の一覧を取得する処理（架空の関数）。実際のサービスでは、ここでデータベースにアクセスします。' },
+    { code: '?>', explain: '「PHPのプログラムはここまで」という目印。' },
+    { code: '<h1><?= htmlspecialchars($user) ?>さんのおすすめ</h1>', explain: '見出しを作ります。htmlspecialchars は、入力に含まれる特殊な文字を無害な表示用の文字に変換する関数で、XSSなどを防ぐために使います。' },
+    { code: '<?php foreach ($videos as $v): ?>', explain: '動画の一覧を1件ずつ取り出して、繰り返し処理を始めます。' },
+    { code: "  <li><?= htmlspecialchars($v['title']) ?></li>", explain: '動画のタイトルを1行ずつ作ります。ここでも出力時に変換（エスケープ）しています。' },
+    { code: '<?php endforeach; ?>', explain: '繰り返しの終わり。ここまで実行されると、完成したHTMLがブラウザへ返ります。' },
+];
+const OPS4_ROUNDS = [
+    {
+        id: 'r1', title: '① 深刻な脆弱性が発表された',
+        situation: 'あなたは架空の通販サイト「ミライ通販」の運用責任者です。朝、PHPの重大な脆弱性に関する注意喚起が流れてきました。まず何をしますか？（選択肢にある「棚卸し」は、使っているシステムやソフトを洗い出して一覧にすることです）',
+        options: [
+            { text: '公式情報（PHP Group・IPA・JPCERT/CC）を確認し、PHPを使っている箇所の棚卸しを始め、責任者へ共有する', risk: -15, impact: 0, fit: 'good', why: '事実の確認と把握が最初の一手です。「棚卸し」とは、自分たちが使っているサーバー・ソフト・サービスを洗い出して一覧にし、どこで何が使われているか（PHPならバージョンも）を把握することです。これが分からないと、どこを直せばよいか決められません。誰が・何を・いつまでにするかを動かす土台にもなります。' },
+            { text: '何も分からないまま、すぐにサイトを全面停止する', risk: -5, impact: 30, fit: 'cond', why: '影響が極めて大きく入口を閉じる必要がある場合は選択肢になりますが、状況把握なしの全面停止は事業への影響が大きく、再開条件も決められません。' },
+            { text: 'SNSの噂を見ながら、様子を見る', risk: 15, impact: 0, fit: 'poor', why: '噂では事実と推測の区別がつきません。公式情報を確認しましょう。' },
+            { text: '「うちはPHPじゃないはず」と考えて調べない', risk: 20, impact: 0, fit: 'poor', why: '製品やサービスの内部でPHPが使われていて把握できていないことがあります。思い込みで放置しないこと。' },
+        ],
+    },
+    {
+        id: 'r2', title: '② 自社が影響を受けるか分からない',
+        situation: '棚卸し（使っているシステムの洗い出し）をしましたが、本番サーバーのPHPのバージョンも、実行方式（mod_php／PHP-FPM）も、すぐには分かりません。',
+        options: [
+            { text: '実際のバージョンと実行方式、提供元（ホスティング／OSパッケージ）を確認し、分からない部分は「未確認」として管理する', risk: -15, impact: 0, fit: 'good', why: '推測と確認済みを分けて管理します。実行方式によって悪用のしやすさが変わると説明されているため、実行方式の把握も有用です。' },
+            { text: 'ホスティング会社の公表情報と問い合わせで対応状況を確認しつつ、自分で管理している部分（アプリ・設定）も並行して確認する', risk: -12, impact: 0, fit: 'good', why: '責任分界を意識した動きです。提供元の対応を待つだけにせず、自分の責任範囲も確認します。' },
+            { text: '公式の修正版の番号より古く見えるので、機械的に「影響あり・未対応」と決めつけて社内に伝える', risk: -3, impact: 5, fit: 'cond', why: '慎重な判断ですが、OS提供のパッケージは番号の付け方が公式と異なり、修正が取り込まれていることもあります。提供元の情報で確認を。' },
+            { text: '「影響なし」と仮定して先に進める', risk: 20, impact: 0, fit: 'poor', why: '未確認を「大丈夫」と仮定するのが最も危険です。' },
+        ],
+    },
+    {
+        id: 'r3', title: '③ 修正版が公開された',
+        situation: '修正版が公開されました。あなたの環境に該当する修正版（またはOSの修正パッケージ）があります。',
+        options: [
+            { text: '自環境に該当する修正版を特定し、テスト環境で検証したうえで、本番適用の計画（担当・時間・戻し手順）を立てる', risk: -10, impact: 5, fit: 'good', why: '緊急でも「特定 → 検証 → 計画」を踏むと、更新による別の障害を防げます。' },
+            { text: '悪用の可能性が高く影響が大きい環境のため、バックアップと戻し手順を確保したうえで、検証を最小限にして当日中に適用する', risk: -15, impact: 12, fit: 'cond', why: '緊急度が非常に高いと判断できる場合は有力な選択肢です。ただし、バックアップ・戻し手順・適用後の確認が前提です。' },
+            { text: '来月の定期メンテナンスまで待つ', risk: 20, impact: 0, fit: 'poor', why: '重大な脆弱性では、定期メンテナンスまで待つ余裕がないことが多いです。' },
+            { text: '最新版にすれば安心なので、バックアップなしで本番を更新する', risk: -5, impact: 30, fit: 'poor', why: 'バックアップなしの更新は、障害時に戻せません。手順を飛ばすと別のリスクが生まれます。' },
+        ],
+    },
+    {
+        id: 'r4', title: '④ すぐに更新するとサービス停止の可能性がある',
+        situation: '更新作業には、短時間のサービス停止が伴う可能性があります。決済機能があり、停止は売上に影響します。',
+        options: [
+            { text: '影響の小さい時間帯に緊急メンテナンスを事前告知し、バックアップを取ったうえで更新する', risk: -15, impact: 10, fit: 'good', why: '影響を最小化しつつ、更新を先送りしない判断です。告知は利用者への説明責任でもあります。' },
+            { text: '更新までの間、暫定措置（公開範囲の縮小・設定変更・WAF等）を入れ、期限と担当を決めて更新する', risk: -5, impact: 3, fit: 'cond', why: '暫定措置は更新の代わりにはなりません。期限付きで、更新計画とセットなら有効な時間稼ぎです。' },
+            { text: '利用者に何も告知せず、深夜にこっそり更新する', risk: -10, impact: 15, fit: 'poor', why: '更新自体は必要でも、停止の可能性がある作業を告知しないと、説明責任を果たせず、問い合わせ・混乱が増えます。' },
+            { text: '停止の可能性があるので、更新しない', risk: 25, impact: -5, fit: 'poor', why: '停止を避けるために脆弱性を放置するのは、より大きな停止・被害につながり得ます。' },
+        ],
+    },
+    {
+        id: 'r5', title: '⑤ 修正作業をすぐに完了できない',
+        situation: '担当者が不足し、更新の完了は明日の夜になりそうです。それまでの間の対応を決めます。',
+        options: [
+            { text: '暫定措置と監視の強化を行い、更新の期限と担当者を決めて責任者へ報告する', risk: -12, impact: 3, fit: 'good', why: '更新できない間のリスクを下げ、期限と責任の所在を明確にしています。' },
+            { text: '悪用の可能性と影響が大きく暫定措置では不十分と判断し、該当する機能（またはサイト）を一時停止する', risk: -20, impact: 25, fit: 'cond', why: '停止は常に正解でも不正解でもありません。リスクが大きい、暫定措置が効かない、状況が不明、などの条件で有力になります。再開条件も決めておきます。' },
+            { text: '暫定措置を入れたので、対応は完了とする', risk: 15, impact: 0, fit: 'poor', why: '暫定措置は特定の攻撃経路にしか効かず、根本解決ではありません。' },
+            { text: '何もしないで更新の完了を待つ', risk: 25, impact: 0, fit: 'poor', why: '待つ間も攻撃は試みられ得ます。できる範囲の低減策と監視が必要です。' },
+        ],
+    },
+    {
+        id: 'r6', title: '⑥ 更新後に確認が必要',
+        situation: '更新作業が完了しました。サービスを通常運用に戻す前の確認です。',
+        options: [
+            { text: '実際に動いているバージョンと再起動を確認し、主要機能とログを確認して、結果を記録してから通常運用に戻す', risk: -10, impact: 0, fit: 'good', why: '「更新したつもり」を防ぐには、実際に動いているものを確認します。記録を残すと説明にも役立ちます。' },
+            { text: 'トップページが表示できたので、完了とする', risk: 10, impact: 5, fit: 'poor', why: '表示できても、再起動漏れや主要機能の不具合、ログの異常は見逃します。' },
+            { text: '不具合は、利用者の問い合わせで気づけばよいとする', risk: 15, impact: 15, fit: 'poor', why: '利用者に発見させるのは最終手段です。更新後の確認と監視は運営側の責任です。' },
+        ],
+    },
+];
+const FINAL6_ROUNDS = [
+    {
+        id: 'f1', title: '① 重大な脆弱性に関する注意喚起',
+        situation: 'あなたは架空のWebサービス「ミライ通販」のセキュリティ担当です。PHPの重大な脆弱性についての注意喚起が届きました。最初の一手は？',
+        options: [
+            { text: '公式情報（PHP Group・IPA・JPCERT/CC）で事実を確認し、PHPの利用箇所の棚卸しを始める', risk: -10, impact: 0, fit: 'good', why: '事実の確認と把握が最初の一手です。「棚卸し」とは、使っているサーバー・ソフト・サービスを洗い出して一覧にし、どこで何が使われているか（PHPならバージョンも）を把握することです。', axes: { info: 2, order: 2 } },
+            { text: '確認前に、影響が不明なまま全サービスを停止する', risk: -5, impact: 30, fit: 'cond', why: '入口を閉じる判断もあり得ますが、把握・根拠なしの停止は影響が大きく再開条件も決められません。', axes: { info: 0, order: 1 } },
+            { text: 'SNSで話題になっている対処法をそのまま試す', risk: 10, impact: 5, fit: 'poor', why: '出典不明の対処は、事実と推測の区別がつかず、別の障害や危険を招きます。', axes: { info: 0, order: 0 } },
+        ],
+    },
+    {
+        id: 'f2', title: '② システムのバージョンが不明',
+        situation: '棚卸しをしたところ、本番環境のPHPのバージョンが記録されていません。複数のサーバーがあり、一部は委託先が管理しています。',
+        options: [
+            { text: '実際のバージョンと実行方式を各サーバーで確認し、委託先にも対応状況を確認。分からない部分は「未確認」として管理する', risk: -12, impact: 0, fit: 'good', why: '推測と確認済みを分け、責任分界も踏まえた確認です。', axes: { info: 2, risk: 2 } },
+            { text: '委託先からの連絡を待つ', risk: 5, impact: 0, fit: 'cond', why: '委託先の対応確認は必要ですが、自分で管理する部分の確認も並行しないと見落とします。', axes: { info: 1, risk: 1 } },
+            { text: '「影響なし」と仮定して、対応リストから外す', risk: 20, impact: 0, fit: 'poor', why: '未確認を「大丈夫」と仮定するのが最も危険です。', axes: { info: 0, risk: 0 } },
+        ],
+    },
+    {
+        id: 'f3', title: '③ 不審なアクセスの通知',
+        situation: '監視ツールが「PHPのワーカーが短時間に何度も異常終了している」「異常に長いCookieを含むリクエストがある」と通知してきました。',
+        options: [
+            { text: 'ログを保全し、通知の内容を確認。責任者へ事実と未確認の点を分けて報告し、該当サーバーの封じ込めを検討する', risk: -12, impact: 5, fit: 'good', why: '証拠保全 → 報告 → 影響範囲の調査・封じ込め、の順序です。', axes: { order: 2, risk: 2, info: 2 } },
+            { text: 'まずサーバーを再起動して、ログも整理して調査しやすくする', risk: 10, impact: 5, fit: 'poor', why: '再起動やログの整理は、痕跡を失う恐れがあります。保全が先です。', axes: { order: 0, risk: 0, info: 0 } },
+            { text: '攻撃かどうか分からないので、様子を見る', risk: 15, impact: 0, fit: 'poor', why: '痕跡の確認が求められているのに放置すると、被害を拡大させる恐れがあります。', axes: { order: 0, risk: 0, info: 0 } },
+        ],
+    },
+    {
+        id: 'f4', title: '④ 修正作業によるサービス停止の懸念',
+        situation: '修正版への更新には、決済機能を含む短時間の停止が伴う可能性があります。不審なアクセスも確認されています。',
+        options: [
+            { text: 'バックアップと戻し手順を確保し、利用者へ告知したうえで緊急メンテナンスで更新。更新までは暫定措置と監視を強化する', risk: -15, impact: 12, fit: 'good', why: '影響を最小化しつつ、更新を先送りしません。', axes: { risk: 2, order: 2 } },
+            { text: '不審なアクセスの影響範囲が不明なため、更新完了と安全確認までサイトを一時停止する', risk: -20, impact: 28, fit: 'cond', why: '侵害の可能性がある場合は有力な選択肢です。再開条件を決め、利用者へ説明することが前提です。', axes: { risk: 2, order: 1 } },
+            { text: '売上への影響が大きいので、更新は繁忙期の後にする', risk: 25, impact: -5, fit: 'poor', why: '重大な脆弱性と不審なアクセスがあるなかで先送りすると、より大きな被害のリスクが残ります。', axes: { risk: 0, order: 0 } },
+        ],
+    },
+    {
+        id: 'f5', title: '⑤ 社内への報告',
+        situation: '経営陣から「結局、うちは安全なのか？」と聞かれました。現時点で、不審な通知があり、更新作業は進行中です。',
+        options: [
+            { text: '分かっている事実・未確認の事項・今後の作業と見込み時刻を分けて伝える', risk: -5, impact: 0, fit: 'good', why: '断定せず、隠さず、次の報告の時刻を示す説明です。', axes: { explain: 2, info: 1 } },
+            { text: '「問題ありません」と言い切る', risk: 10, impact: 0, fit: 'poor', why: '確認できていないことを断定すると、後で説明が覆り信頼を損ないます。', axes: { explain: 0 } },
+            { text: '心配させないため、不審な通知のことは伝えない', risk: 10, impact: 0, fit: 'poor', why: '重要な事実を伏せると、判断を誤らせ、説明責任も果たせません。', axes: { explain: 0 } },
+        ],
+    },
+    {
+        id: 'f6', title: '⑥ 利用者への説明',
+        situation: '更新のため緊急メンテナンスを行います。利用者向けのお知らせの書き方を決めます。',
+        options: [
+            { text: '何をいつ行うか、利用者への影響、現時点で分かっている点・調査中の点、お願いしたいこと（不審なメールに注意など）、次の更新予定を載せる', risk: -3, impact: 0, fit: 'good', why: '事実と未確認を区別し、利用者が取れる行動と次の更新予定を示します。', axes: { explain: 2 } },
+            { text: '「システムメンテナンスのため」とだけ書く', risk: 3, impact: 3, fit: 'cond', why: '最低限の告知にはなりますが、利用者が状況を判断するための情報が不足します。', axes: { explain: 1 } },
+            { text: '「情報漏えいが起きた可能性が極めて高い」と確認前に断定して告知する', risk: 0, impact: 15, fit: 'poor', why: '未確認の内容を断定すると、不要な不安と混乱を招きます。確認できた事実と調査中の点を分けて伝えます。', axes: { explain: 0 } },
+        ],
+    },
+];
+const MAIL_CAT_LABEL = { safe: '安全そう', caution: '要注意', verify: '追加確認が必要' };
+const MAILS = [
+    {
+        id: 'm1', fromName: 'ミライ通販 注文センター', fromAddr: 'order@miraishop.example',
+        subject: 'ご注文ありがとうございます（注文番号 M-20418）',
+        body: ['（前提：あなたは昨日、ミライ通販で実際に商品を注文しました）', 'ご注文を受け付けました。内容は、ブックマークしている「ミライ通販」のマイページ（注文履歴）からご確認いただけます。', 'このメールへの返信は受け付けておりません。'],
+        answer: 'safe',
+        reasons: [
+            { text: '差出人のドメインが、ふだん使っているサービスのドメインと一致している', valid: true },
+            { text: '自分に心当たりのある注文の確認で、内容が一致している', valid: true },
+            { text: 'パスワードやカード番号などの入力を求められていない', valid: true },
+            { text: '件名に「ありがとうございます」と書いてあるから', valid: false },
+        ],
+        explain: '心当たりがあり、差出人・内容が一致し、機密情報の入力も求められていないため、安全そうです。ただし「安全そう」は「100%安全」ではなく、確認はマイページ（自分のブックマーク）から行うのが確実です。',
+    },
+    {
+        id: 'm2', fromName: 'ミライ銀行 セキュリティ', fromAddr: 'support@mirai-bank-secure.example',
+        subject: '【重要】24時間以内にご確認ください：口座の利用制限について',
+        body: ['お客様の口座に不正なアクセスが検出されました。', '24時間以内に下のリンクから本人確認を行わない場合、口座の利用を停止します。'],
+        link: { text: 'https://www.miraibank.example/login', actual: 'https://miraibank-login.example.invalid/verify' },
+        answer: 'caution',
+        reasons: [
+            { text: '差出人のドメインが、銀行の公式ドメインと違う', valid: true },
+            { text: '表示されているリンクの文字と、実際のリンク先が違う', valid: true },
+            { text: '24時間以内など、期限を切って焦らせている', valid: true },
+            { text: '丁寧な日本語で書かれているから安全', valid: false },
+        ],
+        explain: '差出人ドメイン、表示とリンク先の不一致、期限で焦らせる文面と、複数の観点で不審です。リンクは開かず、公式アプリやブックマークから確認します。',
+    },
+    {
+        id: 'm3', fromName: 'さくら動画 サポート', fromAddr: 'info@sakura-video.example',
+        subject: '【お願い】PHPの脆弱性に関する報道を受け、パスワードの再設定をお願いします',
+        body: ['報道されているPHPの脆弱性を受け、念のためパスワードの再設定をお願いしております。', '※当社サービスで情報漏えいが確認されたわけではありません。'],
+        link: { text: 'パスワードを再設定する', actual: 'https://sakura-video.example/account/reset' },
+        answer: 'verify',
+        reasons: [
+            { text: 'ドメインは一致しているが、メールだけでは本物と断定できない（なりすましの可能性もある）', valid: true },
+            { text: 'ニュースの話題に便乗した詐欺メールの可能性もあり、公式サイトで告知を確認したい', valid: true },
+            { text: 'リンクを使わず、公式アプリやブックマークからログインして確認できる', valid: true },
+            { text: 'ニュースで話題になっているので、本物に違いない', valid: false },
+        ],
+        explain: '正規の連絡かもしれませんが、話題に便乗した詐欺も多いため、メール内のリンクを使わず、自分で公式サイトやアプリを開いて告知を確認するのが安全です。このようにメールだけで断定できないものは「追加確認が必要」です。',
+    },
+    {
+        id: 'm4', fromName: '配達センター', fromAddr: 'noreply@takuhai-center.example',
+        subject: 'お荷物をお届けできませんでした（再配達の手続き）',
+        body: ['お客様宛のお荷物を持ち帰りました。', '添付の「再配達依頼書」をご確認の上、手続きをしてください。'],
+        attachment: '再配達依頼書.zip',
+        answer: 'caution',
+        reasons: [
+            { text: '圧縮ファイル（zip）の添付を開かせようとしている', valid: true },
+            { text: '宅配業者名がなく、荷物に心当たりもない', valid: true },
+            { text: '宛名がなく、不特定多数向けのような文面', valid: true },
+            { text: '「お荷物」と書いてあるので、本物の宅配業者だ', valid: false },
+        ],
+        explain: '業者名・追跡番号がなく、添付ファイルを開かせようとする典型的な不審メールです。添付は開かず、削除または報告します。',
+    },
+    {
+        id: 'm5', fromName: 'そらメール運営チーム', fromAddr: 'team@soramail.example',
+        subject: '【お知らせ】10月25日 2:00〜4:00 メンテナンスのお知らせ',
+        body: ['10月25日 2:00〜4:00 の間、システムメンテナンスを行います。', 'この間はメールの送受信ができません。利用者の操作は不要です。', '詳細は、アプリ内のお知らせをご確認ください。'],
+        answer: 'safe',
+        reasons: [
+            { text: '操作や個人情報の入力を求めていない（情報のみのお知らせ）', valid: true },
+            { text: '詳細は、自分で開く公式アプリ内で確認できる', valid: true },
+            { text: 'リンクや添付ファイルがない', valid: true },
+            { text: '運営チームという名前だから', valid: false },
+        ],
+        explain: '行動を求めず、リンクも添付もない情報提供のみの内容です。気になるときは、メールのリンクではなく公式アプリで確認します。',
+    },
+    {
+        id: 'm6', fromName: '田中部長', fromAddr: 'tanaka@mirai-corp.example',
+        subject: '至急お願い（会議中のため返信不要）',
+        body: ['（前提：差出人のアドレスは、社内でふだん見るものと一致しています）', '今、会議中で電話に出られません。至急、取引先へのお礼として、ギフトカードを購入し、番号を写真で送ってもらえますか。'],
+        answer: 'verify',
+        reasons: [
+            { text: 'ふだんと違う内容の依頼で、金銭に関わるため、別の手段（電話・対面）で本人確認したい', valid: true },
+            { text: '「至急」「返信不要」と、確認を妨げる言い方が含まれている', valid: true },
+            { text: 'アドレスが一致していても、アカウントが乗っ取られている可能性がある', valid: true },
+            { text: '社内のアドレスなので、100%安全', valid: false },
+        ],
+        explain: 'アドレスが正しく見えても、アカウントの乗っ取りやなりすましはあり得ます。内容が普段と違い金銭に関わる場合は、メール以外の手段で本人に確認します。見た目や差出人名だけで断定しないことが大切です。',
+    },
+];
+
+return { FLOW_STAGE0, FLOW_STAGE1, CODE_STAGE1, OPS4_ROUNDS, FINAL6_ROUNDS, MAIL_CAT_LABEL, MAILS };
+})();
+__m["components/activities.js"] = (() => {
+// 体験型アクティビティ。すべて教材専用の架空データで、外部への通信は行わない。
+const { announce, h, shuffle, stateful } = __m["dom.js"];
+const { FACT_MAP, FACTS_CHECKED } = __m["content/facts.js"];
+const { CODE_STAGE1, FINAL6_ROUNDS, FLOW_STAGE0, FLOW_STAGE1, MAILS, MAIL_CAT_LABEL, OPS4_ROUNDS } = __m["content/activities.js"];
+const { gradeFinal } = __m["logic.js"];
+const { recordAnswer } = __m["state/store.js"];
+const { bar, factCard, statusBadge } = __m["components/ui.js"];
+function flowViz(cfg, onComplete) {
+    return stateful({ pos: -1, open: null, seen: [], fired: false }, (s, set) => {
+        const n = cfg.nodes.length;
+        const mark = (i) => Array.from(new Set([...s.seen, i]));
+        const step = () => {
+            const pos = Math.min(n - 1, s.pos + 1);
+            set({ pos, open: pos, seen: mark(pos) });
+            announce(`${cfg.nodes[pos].name}：${cfg.nodes[pos].short}`);
+        };
+        const complete = s.seen.length === n;
+        if (complete && !s.fired) {
+            window.setTimeout(() => set({ fired: true }), 0);
+            window.setTimeout(onComplete, 0);
+        }
+        return h('section.flow', { 'aria-label': cfg.title }, h('h3', null, cfg.title), h('ol.flow-nodes', null, cfg.nodes.map((nd, i) => {
+            const active = s.pos === i;
+            const cls = ['flow-node', active ? 'active' : '', s.pos > i ? 'passed' : '', s.seen.includes(i) ? 'seen' : ''].filter(Boolean).join(' ');
+            return h('li', { class: cls }, h('button', { type: 'button', 'aria-expanded': s.open === i ? 'true' : 'false', 'aria-label': `${i + 1}. ${nd.name}の説明を見る`, 'data-fk': `n${i}`, onclick: () => set({ open: s.open === i ? null : i, seen: mark(i) }) }, h('span.flow-icon', { 'aria-hidden': 'true' }, nd.icon), h('span.flow-name', null, nd.name), h('span.flow-short', null, nd.short), active ? h('span.packet', null, i < n - 1 ? '📦 ここを通過中' : '✔ 到着') : null, s.seen.includes(i) ? h('span.seen-mark', { 'aria-label': '確認済み' }, '✔') : null));
+        })), h('div.flow-detail', { role: 'region', 'aria-live': 'polite' }, s.open !== null ? h('div', null, h('strong', null, `${cfg.nodes[s.open].icon} ${cfg.nodes[s.open].name}`), h('p', null, cfg.nodes[s.open].detail)) : h('p.muted', null, '各工程をクリック（タップ）すると、説明が表示されます。')), h('div.actions', null, h('button.btn.primary', { type: 'button', 'data-fk': 'step', disabled: s.pos >= n - 1, onclick: step }, s.pos < 0 ? `▶ ${cfg.actionLabel}` : '次の工程へ進める ▶'), h('span.muted', null, `確認した工程：${s.seen.length} / ${n}`)), complete ? h('div.note.note-info', { role: 'status' }, '✔ すべての工程を確認しました。') : null);
+    });
+}
+function flow0(run, onDone) {
+    void run;
+    return flowViz(FLOW_STAGE0, onDone);
+}
+// ───────────────────────── Stage 1：コードを読む ─────────────────────────
+function code1(run, onDone) {
+    void run;
+    let flowDone = false;
+    let codeDone = false;
+    const wrap = h('div.activity');
+    const status = h('p.muted', { role: 'status' });
+    const check = () => {
+        status.textContent = `体験の進み具合：流れの確認 ${flowDone ? '✔' : '未完了'} ／ コードの解説 ${codeDone ? '✔' : '未完了'}`;
+        if (flowDone && codeDone)
+            onDone();
+    };
+    const codeView = stateful({ clicked: [], cur: null }, (s, set) => {
+        if (s.clicked.length === CODE_STAGE1.length && !codeDone) {
+            codeDone = true;
+            window.setTimeout(check, 0);
+        }
+        return h('section.codeexplain', { 'aria-label': 'コード解説' }, h('h3', null, 'さくら動画のページを作るPHPコード（各行をクリック）'), h('p.muted.small', null, '教材用の短い架空コードです。実行はされません。'), h('div.codebox', { role: 'group', 'aria-label': 'PHPコード' }, CODE_STAGE1.map((l, i) => h('button', { type: 'button', class: `codeline ${s.cur === i ? 'sel' : ''} ${s.clicked.includes(i) ? 'seen' : ''}`, 'aria-pressed': s.cur === i ? 'true' : 'false', 'data-fk': `cl${i}`, onclick: () => set({ cur: i, clicked: s.clicked.includes(i) ? s.clicked : [...s.clicked, i] }) }, h('span.ln', null, String(i + 1)), h('code', null, l.code), s.clicked.includes(i) ? h('span.choice-mark', null, '✔') : null))), h('div.flow-detail', { role: 'region', 'aria-live': 'polite' }, s.cur !== null ? h('div', null, h('strong', null, `${s.cur + 1}行目`), h('p', null, CODE_STAGE1[s.cur].explain)) : h('p.muted', null, '行をクリックすると解説が出ます。')), h('p.muted', null, `読んだ行：${s.clicked.length} / ${CODE_STAGE1.length}`));
+    });
+    wrap.append(flowViz(FLOW_STAGE1, () => { flowDone = true; check(); }), h('hr.sep'), codeView, status);
+    check();
+    return wrap;
+}
+// ───────────────────────── Stage 2：情報カードのミッション ─────────────────────────
+function mission2(run, onDone) {
+    void run;
+    const required = ['event', 'ids', 'cause', 'impact', 'versions', 'exploit', 'mitigation', 'suspend'];
+    const board = ['versionsWide', 'rollout', 'damage'];
+    const read = new Set();
+    const counter = h('p.mission-count', { role: 'status' });
+    let fired = false;
+    const update = () => {
+        counter.textContent = `読んだ情報カード：${read.size} / ${required.length}`;
+        if (read.size === required.length && !fired) {
+            fired = true;
+            counter.textContent += '　✔ 完了！下の「次へ」でミッション確認に進みます。';
+            onDone();
+        }
+    };
+    update();
+    const concept = h('div.concept', { role: 'group', 'aria-label': '概念図（攻撃手順ではありません）' }, h('h4', null, '概念図：なぜ「PHP本体」の問題が広く影響し得るのか'), h('p.muted.small', null, '※これは公開情報に基づく概念図です。攻撃手順ではなく、技術的な詳細は公式アドバイザリ（原文）で確認してください。'), h('ol.concept-steps', null, h('li', null, h('strong', null, '① 多くのサイトが同じPHP本体を使う'), h('br'), '各サイトのコードが違っても、土台のPHP本体が同じなら、同じ弱点を共有します。'), h('li', null, h('strong', null, '② 特定の状況でPHP本体の内部処理が想定外の状態になる'), h('br'), '公開情報では「メモリ不足時の処理の途中終了」「前のリクエストの古い状態が残る」ことが原因と説明されています。'), h('li', null, h('strong', null, '③ 想定外の状態が悪用されると、任意のコード実行につながる可能性'), h('br'), 'ただし環境・設定・実行方式（mod_php／PHP-FPMなど）によって、悪用のしやすさは異なると説明されています。'), h('li', null, h('strong', null, '④ だから、PHP本体（または提供元の修正パッケージ）の更新が最優先'), h('br'), '各サイトのアプリのコードを直すだけでは、根本対策になりません。')));
+    return h('div.activity', null, h('h3', null, 'ミッション：ミライ通販（架空）のサーバーの安全性を確認せよ'), h('div.note.note-info', null, `あなたはミライ通販のセキュリティ担当。PHPの重大な脆弱性が公表されました。まず、情報カードを読みましょう。各カードには、出典・発表日・確認日（${FACTS_CHECKED}）と、確認状況のバッジが付いています。`), concept, counter, h('div.cards', null, required.map((id) => factCard(FACT_MAP[id], false, () => { read.add(id); update(); }))), h('h4', null, '未確認ボード：まだ分かっていないこと・確認できていないこと'), h('p.muted.small', null, '推測で補わず、「未確認」として扱います。公開前に確認するリストにも入っています。'), h('div.cards', null, board.map((id) => factCard(FACT_MAP[id], false))), h('p.muted.small', null, '凡例：', statusBadge('confirmed'), ' ', statusBadge('secondary'), ' ', statusBadge('unconfirmed')));
+}
+// ───────────────────────── 汎用シナリオ（Stage 4 / 6） ─────────────────────────
+const FIT_LABEL = { good: '適切', cond: '条件付きで有効', poor: '不適切' };
+const FIT_ICON = { good: '✔', cond: '△', poor: '✘' };
+function scenario(kind, rounds, xpPerRound, run, onDone) {
+    const key = kind === 'ops' ? 'ops4' : 'final6';
+    const orders = rounds.map((r) => shuffle(r.options.map((_, i) => i)));
+    const init = { i: 0, picked: null, risk: 50, impact: 20, history: [], finished: false, retries: 0 };
+    return stateful(init, (s, set) => {
+        const meter = (label, v, cls, delta) => h('div.meter', null, h('div.meter-head', null, h('span', null, label), h('strong', null, `${v}`), delta ? h('span', { class: `delta ${delta < 0 ? 'down' : 'up'}` }, `${delta > 0 ? '▲ +' : '▼ '}${delta}`) : null), bar(v / 100, `${label} ${v}`, cls));
+        if (s.finished) {
+            const sums = { risk: 0, info: 0, order: 0, explain: 0 };
+            const maxs = { risk: 0, info: 0, order: 0, explain: 0 };
+            rounds.forEach((r, idx) => {
+                const best = {};
+                for (const o of r.options)
+                    for (const [k, v] of Object.entries(o.axes || {}))
+                        best[k] = Math.max(best[k] || 0, v);
+                for (const k of Object.keys(best))
+                    maxs[k] += best[k];
+                const ch = r.options[s.history[idx].pick];
+                for (const [k, v] of Object.entries(ch.axes || {}))
+                    sums[k] += v;
+            });
+            const g = gradeFinal(sums, maxs);
+            if (kind === 'final')
+                run.grade = g.grade;
+            const label = { risk: 'リスクの判断', info: '情報の確認', order: '対応の順序', explain: '説明責任' };
+            return h('section.scenario-end', null, h('h3', null, kind === 'final' ? 'ミッション評価' : '対応結果'), kind === 'final' ? h('div.grade', { role: 'img', 'aria-label': `総合ランク ${g.grade}` }, h('span.grade-letter', null, g.grade), h('span', null, '総合ランク')) : null, h('div.meters', null, meter('リスク（高いほど危険）', s.risk, 'risk'), meter('サービスへの影響', s.impact, 'impact')), kind === 'final' ? h('div.axes', null, h('h4', null, '4つの観点'), Object.keys(label).map((k) => h('div.axis', null, h('span', null, label[k]), bar(g.ratios[k], `${label[k]} ${Math.round(g.ratios[k] * 100)}%`, 'axis-bar'), h('strong', null, `${Math.round(g.ratios[k] * 100)}%`)))) : null, h('h4', null, '各場面の振り返り'), h('ol.review', null, rounds.map((r, idx) => {
+                const hst = s.history[idx];
+                const goods = r.options.filter((o) => o.fit === 'good');
+                return h('li', null, h('strong', null, r.title), h('br'), h('span', { class: `fit fit-${hst.fit}` }, `${FIT_ICON[hst.fit]} あなたの選択：${FIT_LABEL[hst.fit]}`), h('div.muted.small', null, `「${r.options[hst.pick].text}」`), hst.fit !== 'good' ? h('div.small', null, h('strong', null, '適切な例：'), goods.map((g2) => g2.text).join(' ／ ')) : null);
+            })), h('div.note.note-info', null, kind === 'ops'
+                ? '実際の緊急対応は、影響範囲・環境・人員によって最適解が変わります。「条件付きで有効」な選択肢は、前提条件が満たされるときに力を発揮します。'
+                : '評価は、事実の確認・リスクの判断・対応の順序・説明責任の4観点で行いました。単純な正解数ではありません。'), h('div.actions', null, h('button.btn.ghost', { type: 'button', 'data-fk': 'retry', onclick: () => set({ ...init, retries: s.retries + 1 }) }, 'もう一度やり直す（XPは初回のみ）'), h('button.btn.primary', { type: 'button', 'data-fk': 'done', onclick: onDone }, '次へ ▶')));
+        }
+        const r = rounds[s.i];
+        const order = orders[s.i];
+        const picked = s.picked;
+        const choose = (oi) => {
+            if (picked !== null)
+                return;
+            const o = r.options[oi];
+            run.total += 1;
+            if (o.fit === 'poor')
+                run.wrong += 1;
+            else
+                run.correct += 1;
+            const xp = o.fit === 'good' ? xpPerRound : o.fit === 'cond' ? Math.round(xpPerRound * 0.6) : 0;
+            recordAnswer(`act:${key}:${r.id}`, o.fit !== 'poor', null, Math.max(1, xp));
+            announce(`${FIT_LABEL[o.fit]}。${o.why}`);
+            set({ picked: oi, risk: Math.max(0, Math.min(100, s.risk + o.risk)), impact: Math.max(0, Math.min(100, s.impact + o.impact)), history: [...s.history, { fit: o.fit, pick: oi }] });
+            window.setTimeout(() => document.querySelector('.scenario [data-fk="next"]')?.focus(), 0);
+        };
+        const last = picked !== null ? r.options[picked] : null;
+        return h('section.scenario', { 'aria-label': kind === 'ops' ? '緊急対応シミュレーション' : '総合ミッション' }, h('div.meters', null, meter('リスク（高いほど危険）', s.risk, 'risk', last ? last.risk : 0), meter('サービスへの影響', s.impact, 'impact', last ? last.impact : 0)), h('p.muted.small', null, `場面 ${s.i + 1} / ${rounds.length}`), h('h3', null, r.title), h('p.situation', null, r.situation), h('div.options', { role: 'group', 'aria-label': '選択肢' }, order.map((oi, di) => {
+            const o = r.options[oi];
+            const chosen = picked === oi;
+            const cls = ['option', chosen ? 'chosen' : '', picked !== null ? `fit-${o.fit}` : ''].filter(Boolean).join(' ');
+            return h('button', { type: 'button', class: cls, disabled: picked !== null, 'data-fk': `o${di}`, onclick: () => choose(oi) }, h('span.opt-text', null, o.text), picked !== null ? h('span.fit-tag', null, `${FIT_ICON[o.fit]} ${FIT_LABEL[o.fit]}`) : null);
+        })), last ? h('div', { class: `result ${last.fit === 'poor' ? 'ng' : 'ok'}`, role: 'status' }, h('div.result-head', null, h('strong', null, `${FIT_ICON[last.fit]} あなたの判断：${FIT_LABEL[last.fit]}`)), h('p', null, last.why), h('p.muted.small', null, '※他の選択肢の評価も上に表示しています。状況によって、最適な判断は変わります。')) : null, last ? h('div.actions', null, h('button.btn.primary', { type: 'button', 'data-fk': 'next', onclick: () => (s.i + 1 < rounds.length ? set({ i: s.i + 1, picked: null }) : set({ finished: true })) }, s.i + 1 < rounds.length ? '次の場面へ ▶' : '結果を見る ▶')) : null);
+    });
+}
+const ops4 = (run, onDone) => scenario('ops', OPS4_ROUNDS, 8, run, onDone);
+const final6 = (run, onDone) => scenario('final', FINAL6_ROUNDS, 10, run, onDone);
+// ───────────────────────── Stage 5：メール仕分け ─────────────────────────
+function mail5(run, onDone) {
+    const cats = ['safe', 'caution', 'verify'];
+    const init = { i: 0, cat: null, reasons: [], showLink: false, submitted: false, okCount: 0 };
+    const reasonOrders = MAILS.map((m) => shuffle(m.reasons.map((_, i) => i)));
+    return stateful(init, (s, set) => {
+        if (s.i >= MAILS.length) {
+            return h('section.scenario-end', null, h('h3', null, '仕分け結果'), h('p', null, `${MAILS.length}通中 ${s.okCount}通を正しく分類できました。`), h('div.note.note-info', null, '見た目や差出人名だけでは断定できません。ドメイン・リンク先・文面・要求内容を組み合わせ、迷ったら「メール内のリンクを使わず、公式の経路で確認」しましょう。'), h('div.actions', null, h('button.btn.primary', { type: 'button', 'data-fk': 'done', onclick: onDone }, '次へ ▶')));
+        }
+        const m = MAILS[s.i];
+        const submit = () => {
+            if (!s.cat || s.submitted)
+                return;
+            const ok = s.cat === m.answer;
+            run.total += 1;
+            if (ok)
+                run.correct += 1;
+            else
+                run.wrong += 1;
+            recordAnswer(`act:mail5:${m.id}`, ok, 'phishing', 8);
+            announce(ok ? '正しい分類です' : '分類が違います');
+            set({ submitted: true, okCount: s.okCount + (ok ? 1 : 0) });
+            window.setTimeout(() => document.querySelector('.mailtask [data-fk="next"]')?.focus(), 0);
+        };
+        const ok = s.submitted && s.cat === m.answer;
+        return h('section.mailtask', { 'aria-label': 'メール仕分け' }, h('p.muted.small', null, `メール ${s.i + 1} / ${MAILS.length}（すべて架空のメールです。ドメインは使用できない教材用のものです）`), h('article.mail', null, h('header.mail-head', null, h('div', null, h('strong', null, '差出人：'), m.fromName, ' ', h('span.muted', null, `<${m.fromAddr}>`)), h('div', null, h('strong', null, '件名：'), m.subject)), h('div.mail-body', null, m.body.map((l) => h('p', null, l)), m.link ? h('p', null, h('span.fakelink', null, m.link.text), ' ', h('button.btn.small.ghost', { type: 'button', 'aria-pressed': s.showLink ? 'true' : 'false', 'data-fk': 'lk', onclick: () => set({ showLink: !s.showLink }) }, s.showLink ? 'リンク先を隠す' : '🔍 リンク先を確認する'), s.showLink ? h('span.linkreal', null, ` 実際のリンク先：${m.link.actual}`) : null) : null, m.attachment ? h('p', null, '📎 添付ファイル：', h('span.fakelink', null, m.attachment)) : null)), h('fieldset.choices', null, h('legend', null, h('strong', null, '① このメールを分類してください')), cats.map((c) => {
+            const right = s.submitted && c === m.answer;
+            const wrong = s.submitted && s.cat === c && c !== m.answer;
+            return h('label', { class: `choice ${s.cat === c ? 'sel' : ''} ${right ? 'right' : ''} ${wrong ? 'wrong' : ''}` }, h('input', { type: 'radio', name: `mc${m.id}`, checked: s.cat === c, disabled: s.submitted, 'data-fk': `cat-${c}`, onchange: () => set({ cat: c }) }), h('span.choice-text', null, MAIL_CAT_LABEL[c]), right ? h('span.choice-mark', null, '✔ 正解') : wrong ? h('span.choice-mark', null, '✘ 不正解') : null);
+        })), h('fieldset.choices', null, h('legend', null, h('strong', null, '② 判断の理由として当てはまるものを選んでください（複数選択）')), reasonOrders[s.i].map((ri, di) => {
+            const rs = m.reasons[ri];
+            const on = s.reasons.includes(ri);
+            const cls = ['choice', on ? 'sel' : '', s.submitted && rs.valid ? 'right' : '', s.submitted && on && !rs.valid ? 'wrong' : ''].filter(Boolean).join(' ');
+            return h('label', { class: cls }, h('input', { type: 'checkbox', checked: on, disabled: s.submitted, 'data-fk': `rs${di}`, onchange: () => set({ reasons: on ? s.reasons.filter((x) => x !== ri) : [...s.reasons, ri] }) }), h('span.choice-text', null, rs.text), s.submitted ? h('span.choice-mark', null, rs.valid ? '✔ 妥当な根拠' : on ? '✘ 根拠にならない' : '') : null);
+        })), s.submitted ? h('div', { class: `result ${ok ? 'ok' : 'ng'}`, role: 'status' }, h('div.result-head', null, h('strong', null, ok ? '✔ 正しい分類です' : `✘ 正しい分類は「${MAIL_CAT_LABEL[m.answer]}」です`), ok ? h('span.xp-chip', null, 'XP獲得') : null), h('p', null, m.explain)) : null, h('div.actions', null, s.submitted
+            ? h('button.btn.primary', { type: 'button', 'data-fk': 'next', onclick: () => set({ i: s.i + 1, cat: null, reasons: [], showLink: false, submitted: false }) }, s.i + 1 < MAILS.length ? '次のメールへ ▶' : '結果を見る ▶')
+            : h('button.btn.primary', { type: 'button', 'data-fk': 'submit', disabled: !s.cat || s.reasons.length === 0, onclick: submit }, '判断を確定する'), !s.submitted && (!s.cat || s.reasons.length === 0) ? h('span.muted.small', null, '分類と、理由を1つ以上選ぶと確定できます') : null));
+    });
+}
+const ACTIVITIES = {
+    flow0, code1, mission2, ops4, mail5, final6,
+};
+
+return { flow0, code1, mission2, ops4, final6, mail5, ACTIVITIES };
+})();
+__m["components/questionView.js"] = (() => {
+// 問題表示：単一選択・複数選択・並べ替え・コードレビューの4形式に対応。
+const { announce, h, shuffle, stateful } = __m["dom.js"];
+const { FACT_MAP, FACTS_CHECKED } = __m["content/facts.js"];
+const { CAT_LABEL, DIFF_LABEL } = __m["content/types.js"];
+const { gradeQuestion, questionXp } = __m["logic.js"];
+const { recordAnswer, recordCodeReviewSuccess, recordStat } = __m["state/store.js"];
+const { statusBadge } = __m["components/ui.js"];
+function questionView(q, o) {
+    const shownAt = performance.now();
+    const choicePerm = shuffle((q.choices || []).map((_, i) => i));
+    const fixPerm = shuffle((q.fixes || []).map((_, i) => i));
+    let initOrder = q.order ? shuffle(q.order) : [];
+    if (q.order && initOrder.every((v, i) => v === q.order[i]))
+        initOrder = initOrder.slice().reverse();
+    const init = { sel: null, multi: [], order: initOrder, line: null, fix: null, submitted: false, correct: false, gained: 0, showNotes: false, showClue: false };
+    return stateful(init, (s, set) => {
+        const canSubmit = !s.submitted &&
+            (q.type === 'single' ? s.sel !== null : q.type === 'multi' ? s.multi.length > 0 : q.type === 'order' ? true : s.line !== null && s.fix !== null);
+        const submit = () => {
+            if (!canSubmit)
+                return;
+            const ms = performance.now() - shownAt;
+            let ans;
+            if (q.type === 'single')
+                ans = { type: 'single', value: s.sel };
+            else if (q.type === 'multi')
+                ans = { type: 'multi', value: s.multi };
+            else if (q.type === 'order')
+                ans = { type: 'order', value: s.order };
+            else
+                ans = { type: 'code', line: s.line, fix: s.fix };
+            const correct = gradeQuestion(q, ans);
+            let gained = 0;
+            if (o.mode === 'learn')
+                gained = recordAnswer(q.id, correct, q.cat, questionXp(q));
+            else
+                recordStat(q.cat, correct);
+            if (correct && q.type === 'code')
+                recordCodeReviewSuccess();
+            announce(correct ? '正解です' : '不正解です');
+            set({ submitted: true, correct, gained });
+            window.setTimeout(() => document.querySelector('.question [data-fk="next"]')?.focus(), 0);
+            o.onAnswer(correct, ms);
+        };
+        const showExplain = s.submitted && o.mode === 'learn';
+        const radioName = `q-${q.id}`;
+        const body = [];
+        if (q.type === 'single' || q.type === 'multi') {
+            const isMulti = q.type === 'multi';
+            const answerSet = new Set(isMulti ? q.answer : [q.answer]);
+            body.push(h('fieldset.choices', null, h('legend.sr-only', null, q.prompt), choicePerm.map((orig, di) => {
+                const checked = isMulti ? s.multi.includes(orig) : s.sel === orig;
+                const isRight = answerSet.has(orig);
+                const mark = s.submitted ? (isRight ? '✔ 正解' : checked ? '✘ 不正解' : '') : '';
+                const cls = ['choice', checked ? 'sel' : '', s.submitted && isRight ? 'right' : '', s.submitted && checked && !isRight ? 'wrong' : ''].filter(Boolean).join(' ');
+                return h('label', { class: cls }, h('input', {
+                    type: isMulti ? 'checkbox' : 'radio', name: radioName, checked, disabled: s.submitted, 'data-fk': `c${di}`,
+                    onchange: () => {
+                        if (isMulti)
+                            set({ multi: s.multi.includes(orig) ? s.multi.filter((x) => x !== orig) : [...s.multi, orig] });
+                        else
+                            set({ sel: orig });
+                    },
+                }), h('span.choice-text', null, q.choices[orig]), mark ? h('span.choice-mark', null, mark) : null);
+            })));
+            if (isMulti)
+                body.push(h('p.muted.small', null, '当てはまるものを、すべて選んでください（複数選択）。'));
+        }
+        if (q.type === 'order') {
+            const correctOrder = q.order;
+            body.push(h('p.muted.small', null, '「上へ」「下へ」ボタンで、正しい順番に並べ替えてください。'), h('ol.order-list', null, s.order.map((item, i) => {
+                const rightHere = s.submitted && correctOrder[i] === item;
+                return h('li', { class: `order-item ${s.submitted ? (rightHere ? 'right' : 'wrong') : ''}` }, h('span.order-no', null, `${i + 1}`), h('span.order-text', null, item), s.submitted ? h('span.choice-mark', null, rightHere ? '✔' : '✘') : h('span.order-btns', null, h('button.btn.small.ghost', { type: 'button', 'aria-label': `「${item}」を上へ`, disabled: i === 0, 'data-fk': `up${i}`, onclick: () => { const a = s.order.slice(); [a[i - 1], a[i]] = [a[i], a[i - 1]]; set({ order: a }); } }, '▲ 上へ'), h('button.btn.small.ghost', { type: 'button', 'aria-label': `「${item}」を下へ`, disabled: i === s.order.length - 1, 'data-fk': `dn${i}`, onclick: () => { const a = s.order.slice(); [a[i + 1], a[i]] = [a[i], a[i + 1]]; set({ order: a }); } }, '▼ 下へ')));
+            })));
+            if (s.submitted && !s.correct) {
+                body.push(h('div.note.note-info', null, h('strong', null, '正しい順序：'), h('ol', null, correctOrder.map((x) => h('li', null, x)))));
+            }
+        }
+        if (q.type === 'code') {
+            body.push(h('p.step-label', null, h('strong', null, '① 問題のある行を選ぶ'), h('span.muted.small', null, '（コードは教材用の架空のものです）')), h('div.codebox', { role: 'group', 'aria-label': 'サンプルコード' }, q.code.map((line, i) => {
+                const sel = s.line === i;
+                const bad = s.submitted && q.badLine === i;
+                const cls = ['codeline', sel ? 'sel' : '', bad ? 'right' : '', s.submitted && sel && q.badLine !== i ? 'wrong' : ''].filter(Boolean).join(' ');
+                return h('button', { type: 'button', class: cls, 'aria-pressed': sel ? 'true' : 'false', disabled: s.submitted, 'data-fk': `l${i}`, onclick: () => set({ line: i }) }, h('span.ln', null, String(i + 1)), h('code', null, line), s.submitted && bad ? h('span.choice-mark', null, '← 問題の行') : null);
+            })), o.mode === 'learn' && (q.lineNotes || q.clue) ? h('div.aid', null, h('p.small.muted', null, '🔰 PHPが分からなくても大丈夫。ヒントは何度見てもXPは減りません。'), h('div.actions', null, q.clue ? h('button.btn.small.ghost', { type: 'button', 'aria-expanded': s.showClue ? 'true' : 'false', 'data-fk': 'clue', onclick: () => set({ showClue: !s.showClue }) }, s.showClue ? '💡 注目ポイントを隠す' : '💡 どこに注目する？（ヒント）') : null, q.lineNotes ? h('button.btn.small.ghost', { type: 'button', 'aria-expanded': s.showNotes ? 'true' : 'false', 'data-fk': 'notes', onclick: () => set({ showNotes: !s.showNotes }) }, s.showNotes ? '🔰 各行の意味を隠す' : '🔰 コードの読み方（各行の意味）') : null), s.showClue && q.clue ? h('div.note.note-info', { role: 'note' }, q.clue) : null, s.showNotes && q.lineNotes ? h('ol.linenotes', null, q.lineNotes.map((n, i) => h('li', null, h('span.ln', null, `${i + 1}行目`), ' ', n))) : null) : null, h('p.step-label', null, h('strong', null, '② 安全な修正を選ぶ')), h('fieldset.choices', null, h('legend.sr-only', null, '安全な修正'), fixPerm.map((orig, di) => {
+                const checked = s.fix === orig;
+                const isRight = q.fixAnswer === orig;
+                const mark = s.submitted ? (isRight ? '✔ 正解' : checked ? '✘ 不正解' : '') : '';
+                const cls = ['choice', checked ? 'sel' : '', s.submitted && isRight ? 'right' : '', s.submitted && checked && !isRight ? 'wrong' : ''].filter(Boolean).join(' ');
+                return h('label', { class: cls }, h('input', { type: 'radio', name: radioName + '-fix', checked, disabled: s.submitted, 'data-fk': `f${di}`, onchange: () => set({ fix: orig }) }), h('span.choice-text', null, q.fixes[orig]), mark ? h('span.choice-mark', null, mark) : null);
+            })));
+        }
+        const result = s.submitted
+            ? h('div', { class: `result ${s.correct ? 'ok' : 'ng'}`, role: 'status' }, h('div.result-head', null, h('span', { 'aria-hidden': 'true' }, s.correct ? '✔' : '✘'), h('strong', null, s.correct ? ' 正解！' : ' 不正解'), o.mode === 'learn' && s.gained > 0 ? h('span.xp-chip', null, `+${s.gained} XP`) : null, o.mode === 'learn' && !s.gained && s.correct ? h('span.muted.small', null, '（獲得済みのためXPなし）') : null), showExplain ? h('p', null, q.explain) : h('p.muted', null, '解説は結果画面でまとめて表示します。'), showExplain && q.factIds && q.factIds.length ? h('div.related', null, h('span.muted.small', null, '関連する事実カード：'), q.factIds.filter((id) => FACT_MAP[id]).map((id) => h('a.chip', { href: `#/facts/${id}` }, FACT_MAP[id].title.slice(0, 24) + (FACT_MAP[id].title.length > 24 ? '…' : ''), ' ', statusBadge(FACT_MAP[id].status)))) : null, showExplain && q.volatile ? h('p.muted.small', null, `※この問題は公式情報の更新で答えが変わる可能性があります（確認日 ${FACTS_CHECKED}）。`) : null)
+            : null;
+        return h('form.question', { onsubmit: (e) => { e.preventDefault(); if (s.submitted)
+                o.onNext();
+            else
+                submit(); } }, h('div.q-meta', null, o.index ? h('span.chip', null, `第${o.index}問${o.total ? ' / ' + o.total : ''}`) : null, h('span.chip', null, CAT_LABEL[q.cat]), h('span.chip', null, DIFF_LABEL[q.diff])), h('h3.q-prompt', null, q.prompt), body, result, h('div.actions', null, s.submitted
+            ? h('button.btn.primary', { type: 'submit', 'data-fk': 'next', autofocus: true }, o.nextLabel || '次へ ▶')
+            : h('button.btn.primary', { type: 'submit', disabled: !canSubmit, 'data-fk': 'submit' }, '回答する'), !s.submitted && !canSubmit ? h('span.muted.small', null, q.type === 'code' ? '行と修正の両方を選ぶと回答できます' : '選択すると回答できます') : null));
+    });
+}
+
+return { questionView };
+})();
+__m["components/stageRunner.js"] = (() => {
+// ステージの進行：導入 → 各ステップ（読む／体験／クイズ）→ クリア画面
+const { announce, h } = __m["dom.js"];
+const { STAGES, STAGE_MAP } = __m["content/stages.js"];
+const { Q_MAP } = __m["content/questions.js"];
+const { ACHIEVEMENTS } = __m["config/game.js"];
+const { clearStage, getResume, getState, isCleared, isUnlocked, setLastStage, setResume } = __m["state/store.js"];
+const { ACTIVITIES } = __m["components/activities.js"];
+const { questionView } = __m["components/questionView.js"];
+const { bar, renderBlocks } = __m["components/ui.js"];
+const { levelFor } = __m["config/game.js"];
+function stageRunner(stageId) {
+    const stage = STAGE_MAP[stageId];
+    const root = h('div.stage');
+    if (!stage) {
+        root.append(h('div.card', null, h('h2', null, 'ステージが見つかりません'), h('a.btn.primary', { href: '#/' }, 'ホームへ')));
+        return root;
+    }
+    const idx = STAGES.findIndex((s) => s.id === stageId);
+    if (!isUnlocked(idx)) {
+        root.append(h('div.card', null, h('h2', null, `🔒 STAGE ${stage.no} はまだロックされています`), h('p', null, `前のステージ（STAGE ${STAGES[idx - 1].no}）をクリアすると挑戦できます。`), h('a.btn.primary', { href: '#/' }, 'ホームへ戻る')));
+        return root;
+    }
+    const run = { wrong: 0, correct: 0, total: 0 };
+    const startXp = getState().xp;
+    const steps = stage.steps;
+    const header = (i) => h('header.stage-head', null, h('div.crumbs', null, h('a', { href: '#/' }, '← ホーム'), h('span.muted', null, ` ／ STAGE ${stage.no}`)), h('h2', null, `STAGE ${stage.no}｜${stage.title}`), h('div.stepbar', { 'aria-label': 'ステップの進み具合' }, steps.map((s, k) => h('span', { class: `stepdot ${k < i ? 'done' : k === i ? 'cur' : ''}`, 'aria-current': k === i ? 'step' : null }, `${k + 1}`)), h('span.muted.small', null, `ステップ ${i + 1} / ${steps.length}`)), bar(i / steps.length, `ステージの進み具合 ${i} / ${steps.length}`));
+    function paint(...nodes) {
+        root.replaceChildren(...nodes.filter(Boolean));
+        window.scrollTo({ top: 0 });
+        const hd = root.querySelector('h2');
+        if (hd) {
+            hd.setAttribute('tabindex', '-1');
+            hd.focus({ preventScroll: true });
+        }
+    }
+    function intro() {
+        const resumeAt = getResume(stageId);
+        const cleared = isCleared(stageId);
+        setLastStage(stageId);
+        paint(h('div.card.intro', null, h('div.intro-badge', { 'aria-hidden': 'true' }, `STAGE ${stage.no}`), h('h2', null, stage.title), h('p.lead', null, stage.intro), h('div.meta-row', null, h('span.chip', null, `難易度：${stage.difficulty}`), h('span.chip', null, `約${stage.minutes}分`), h('span.chip', null, `初回クリアボーナス +${stage.clearBonus} XP`), cleared ? h('span.chip.ok', null, '✔ クリア済み（再挑戦ではXPは増えません）') : null), h('h3', null, 'このステージのゴール'), h('ul', null, stage.goals.map((g) => h('li', null, g))), h('p.muted.small', null, `教材の状態：${stage.meta.status}（最終確認日 ${stage.meta.lastChecked}）`), h('div.actions', null, resumeAt > 0 && !cleared ? h('button.btn.primary', { type: 'button', 'data-fk': 'resume', onclick: () => showStep(resumeAt) }, `続きから（ステップ ${resumeAt + 1}）`) : null, h('button', { type: 'button', class: `btn ${resumeAt > 0 && !cleared ? 'ghost' : 'primary'}`, 'data-fk': 'start', onclick: () => showStep(0) }, resumeAt > 0 && !cleared ? '最初から' : '▶ スタート'), h('a.btn.ghost', { href: '#/' }, 'ホームへ戻る'))));
+    }
+    function next(i) {
+        if (i + 1 < steps.length)
+            showStep(i + 1);
+        else
+            finish();
+    }
+    function showStep(i) {
+        const st = steps[i];
+        if (!isCleared(stageId))
+            setResume(stageId, i);
+        const nextLabel = i + 1 < steps.length ? '次へ ▶' : 'ステージを完了する ▶';
+        if (st.kind === 'read') {
+            paint(header(i), h('div.card', null, h('h3', null, st.title), renderBlocks(st.blocks), h('div.actions', null, h('button.btn.primary', { type: 'button', 'data-fk': 'next', onclick: () => next(i) }, nextLabel))));
+        }
+        else if (st.kind === 'activity') {
+            const nextBtn = h('button.btn.primary', { type: 'button', 'data-fk': 'next', disabled: true, onclick: () => next(i) }, nextLabel);
+            const hint = h('span.muted.small', null, '体験を最後まで終えると進めます');
+            const needsOwnNext = st.id === 'ops4' || st.id === 'final6' || st.id === 'mail5';
+            const act = ACTIVITIES[st.id](run, () => {
+                nextBtn.disabled = false;
+                hint.textContent = '✔ 体験を完了しました';
+                if (needsOwnNext)
+                    next(i);
+            });
+            paint(header(i), h('div.card', null, h('h3', null, st.title), act, needsOwnNext ? null : h('div.actions', null, nextBtn, hint)));
+        }
+        else {
+            showQuiz(i, st.qids, 0);
+        }
+    }
+    function showQuiz(i, qids, qi) {
+        const st = steps[i];
+        const q = Q_MAP[qids[qi]];
+        const last = qi + 1 >= qids.length;
+        const qv = questionView(q, {
+            mode: 'learn', index: qi + 1, total: qids.length,
+            nextLabel: last ? (i + 1 < steps.length ? '次へ ▶' : 'ステージを完了する ▶') : '次の問題へ ▶',
+            onAnswer: (ok) => { run.total += 1; if (ok)
+                run.correct += 1;
+            else
+                run.wrong += 1; },
+            onNext: () => (last ? next(i) : showQuiz(i, qids, qi + 1)),
+        });
+        paint(header(i), h('div.card', null, h('h3', null, st.title), bar(qi / qids.length, `クイズ ${qi} / ${qids.length}`), qv));
+    }
+    function finish() {
+        const accuracy = run.total ? run.correct / run.total : 1;
+        const before = new Set(Object.keys(getState().achievements));
+        const res = clearStage(stageId, { accuracy, perfect: run.wrong === 0 && run.total > 0, bonus: stage.clearBonus, grade: run.grade });
+        const gained = getState().xp - startXp;
+        const lv = levelFor(getState().xp);
+        const newAch = Object.keys(getState().achievements).filter((k) => !before.has(k)).map((k) => ACHIEVEMENTS.find((a) => a.id === k)).filter(Boolean);
+        const nextStage = STAGES[idx + 1];
+        announce(`ステージクリア。獲得XP ${gained}`);
+        const xpNum = h('strong.xp-big', null, '+0');
+        const target = gained;
+        const reduce = document.documentElement.getAttribute('data-motion') === 'reduce';
+        if (reduce || target === 0)
+            xpNum.textContent = `+${target}`;
+        else {
+            const t0 = performance.now();
+            const tick = (t) => {
+                const p = Math.min(1, (t - t0) / 900);
+                xpNum.textContent = `+${Math.round(target * p)}`;
+                if (p < 1)
+                    requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        }
+        paint(h('div.card.clear', null, h('div.clear-shield', { 'aria-hidden': 'true' }, '🛡️'), h('h2', null, `STAGE ${stage.no} クリア！`), h('p.lead', null, run.wrong === 0 && run.total > 0 ? 'ノーミスでクリアしました。' : 'おめでとうございます。解説を読んで理解を深めた分だけ、守る力が育ちます。'), h('div.clear-stats', null, h('div', null, h('span.muted', null, '獲得XP'), xpNum, res.firstClear ? h('span.muted.small', null, `（初回ボーナス +${res.bonusGained} 含む）`) : h('span.muted.small', null, '（クリア済みのため、新しい問題のXPのみ）')), h('div', null, h('span.muted', null, '正答率'), h('strong', null, `${Math.round(accuracy * 100)}%`), h('span.muted.small', null, `${run.correct} / ${run.total}`)), h('div', null, h('span.muted', null, 'レベル'), h('strong', null, `Lv.${lv.lv} ${lv.name}`)), run.grade ? h('div', null, h('span.muted', null, '総合ランク'), h('strong', null, run.grade)) : null), newAch.length ? h('div.note.note-info', { role: 'status' }, h('strong', null, '実績を解除：'), newAch.map((a) => h('div', null, `${a.icon} ${a.name}`))) : null, h('div.actions', null, nextStage ? h('a.btn.primary', { href: `#/stage/${nextStage.id}` }, `次へ：STAGE ${nextStage.no} ▶`) : h('a.btn.primary', { href: '#/trial' }, 'CYBER TRIAL へ ▶'), h('a.btn.ghost', { href: '#/' }, 'ホームへ'), h('a.btn.ghost', { href: '#/share' }, '結果カードを作る'), h('button.btn.ghost', { type: 'button', onclick: () => intro() }, 'もう一度挑戦'))));
+    }
+    intro();
+    return root;
+}
+
+return { stageRunner };
+})();
+__m["components/trial.js"] = (() => {
+// CYBER TRIAL：ランダム総合問題＋タイムアタック（デモ版：この端末内で採点・記録）
+const { fmtSec, h, stateful } = __m["dom.js"];
+const { SERVICE, TRIAL } = __m["config/game.js"];
+const { QUESTIONS } = __m["content/questions.js"];
+const { STAGES } = __m["content/stages.js"];
+const { CAT_LABEL, DIFF_LABEL } = __m["content/types.js"];
+const { conditionKey, pickTrialSet, questionPoints, sanitizeNick, trialScore } = __m["logic.js"];
+const { addTrial, allStagesCleared, getState, isCleared, setLastTrial, setNick } = __m["state/store.js"];
+const { questionView } = __m["components/questionView.js"];
+const { bar } = __m["components/ui.js"];
+function correctText(q) {
+    if (q.type === 'single')
+        return q.choices[q.answer];
+    if (q.type === 'multi')
+        return q.answer.map((i) => q.choices[i]).join(' ／ ');
+    if (q.type === 'order')
+        return q.order.map((x, i) => `${i + 1}. ${x}`).join(' → ');
+    return `問題の行：${q.badLine + 1}行目（${q.code[q.badLine].trim()}）／ 修正：${q.fixes[q.fixAnswer]}`;
+}
+function rankOf(score, max) {
+    const r = max ? score / max : 0;
+    return r >= 0.75 ? 'S' : r >= 0.55 ? 'A' : r >= 0.35 ? 'B' : 'C';
+}
+function trialPage() {
+    const root = h('div.trial');
+    const unlocked = allStagesCleared();
+    if (!unlocked) {
+        const left = STAGES.filter((s) => !isCleared(s.id));
+        root.append(h('div.card', null, h('h1', null, '⏱ CYBER TRIAL'), h('p', null, '🔒 まだロックされています。STAGE 0〜6 をすべてクリアすると解放されます。'), h('p.muted', null, `未クリア：${left.map((s) => `STAGE ${s.no}`).join('、')}`), h('a.btn.primary', { href: '#/' }, '学習ステージへ')));
+        return root;
+    }
+    function setup() {
+        root.replaceChildren(stateful({ count: 10, mode: 'free', level: 'standard' }, (s, set) => {
+            const radio = (name, val, cur, label, fk) => h('label', { class: `choice ${cur === val ? 'sel' : ''}` }, h('input', { type: 'radio', name, checked: cur === val, 'data-fk': fk, onchange: () => set({ [name]: val }) }), h('span.choice-text', null, label));
+            return h('div', null, h('h1', null, '⏱ CYBER TRIAL'), h('div.note.note-warn', { role: 'note' }, h('strong', null, '記録について：'), '採点は、この端末（ブラウザ）の中で行い、記録も、この端末の中だけに保存されます（外部へは送信されません）。ランキングは「出題条件ごとの、あなた自身の記録」です。'), h('div.card', null, h('fieldset.choices.inline', null, h('legend', null, h('strong', null, '問題数')), TRIAL.counts.map((c) => radio('count', c, s.count, `${c}問`, `cnt${c}`))), h('fieldset.choices.inline', null, h('legend', null, h('strong', null, 'モード')), radio('mode', 'free', s.mode, '制限時間なし（じっくり）', 'm-free'), radio('mode', 'timed', s.mode, `制限時間あり（${s.count}問 × ${TRIAL.timedSecPerQuestion}秒 = ${s.count * TRIAL.timedSecPerQuestion}秒）`, 'm-timed')), h('fieldset.choices.inline', null, h('legend', null, h('strong', null, '難易度')), radio('level', 'standard', s.level, '標準（やさしい〜むずかしい）', 'l-std'), radio('level', 'beginner', s.level, '初心者向け（やさしい・ふつうのみ）', 'l-beg')), h('p.muted.small', null, `比較条件：「${conditionKey(s.count, s.mode, s.level)}」。ランキングは、同じ条件の記録どうしだけで比較します。`), h('div.actions', null, h('button.btn.primary.big', { type: 'button', 'data-fk': 'go', onclick: () => run(s.count, s.mode, s.level) }, '▶ 開始する（押した瞬間から計測）'))), h('div.card', null, h('h2', null, 'スコアの計算方法'), h('p', null, h('strong', null, 'スコア = （正解した問題の配点の合計 ＋ 速度ボーナス）× 正答率')), h('ul', null, h('li', null, `配点：やさしい10点／ふつう15点／むずかしい20点（config/game.ts で変更可）`), h('li', null, `速度ボーナス：正解した問題だけに付き、最大で配点の${TRIAL.speedBonusMax * 100}%。${TRIAL.targetSec}秒以内に答えるほど大きく、${TRIAL.targetSec}秒を超えるとゼロ`), h('li', null, '不正解は0点で速度ボーナスも付かず、さらに正答率が全体に掛かるため、速さ優先で間違いを重ねても得をしません'), h('li', null, 'タイムアウトした未回答の問題は不正解として扱います。途中で中断した場合は記録されません'), h('li', null, 'この教材ではTRIALでXPは増えません（反復によるXPの水増しを防ぐため）。正答率の統計には反映されます'))));
+        }));
+    }
+    function run(count, mode, level) {
+        const set = pickTrialSet(QUESTIONS, count, level);
+        const results = set.map((q) => ({ q, correct: false, ms: 0, answered: false }));
+        const limitMs = mode === 'timed' ? count * TRIAL.timedSecPerQuestion * 1000 : null;
+        const t0 = performance.now();
+        let idx = 0;
+        let done = false;
+        const timerEl = h('span.timer', { role: 'timer' }, '0.0秒');
+        const timerBox = h('div.timerbox', null, timerEl);
+        const holder = h('div.card');
+        const iv = window.setInterval(() => {
+            const el = performance.now() - t0;
+            if (limitMs !== null) {
+                const left = Math.max(0, limitMs - el);
+                timerEl.textContent = `残り ${Math.ceil(left / 1000)}秒`;
+                timerEl.classList.toggle('low', left < 15000);
+                if (left <= 0)
+                    finish('timeout');
+            }
+            else
+                timerEl.textContent = fmtSec(el);
+        }, 250);
+        function finish(status) {
+            if (done)
+                return;
+            done = true;
+            window.clearInterval(iv);
+            const total = status === 'timeout' && limitMs ? limitMs : performance.now() - t0;
+            result(set, results, count, mode, level, total, status);
+        }
+        function show() {
+            const q = set[idx];
+            const last = idx + 1 >= set.length;
+            holder.replaceChildren(bar(idx / set.length, `進み具合 ${idx} / ${set.length}`), questionView(q, {
+                mode: 'trial', index: idx + 1, total: set.length, nextLabel: last ? '結果を見る ▶' : '次の問題へ ▶',
+                onAnswer: (ok, ms) => { results[idx] = { q, correct: ok, ms, answered: true }; },
+                onNext: () => { if (last)
+                    finish('finished');
+                else {
+                    idx += 1;
+                    show();
+                } },
+            }));
+        }
+        root.replaceChildren(h('div.trial-bar', null, h('strong', null, `CYBER TRIAL｜${conditionKey(count, mode, level)}`), timerBox, h('button.btn.small.ghost', { type: 'button', onclick: () => { if (window.confirm('中断しますか？この記録は保存されません。')) {
+                done = true;
+                window.clearInterval(iv);
+                setup();
+            } } }, '中断する')), holder);
+        show();
+    }
+    function result(set, results, count, mode, level, ms, status) {
+        const sc = trialScore(results);
+        const rank = rankOf(sc.score, sc.maxPossible);
+        const byCat = {};
+        results.forEach((r) => {
+            const c = byCat[r.q.cat] || [0, 0];
+            c[1] += 1;
+            if (r.answered && r.correct)
+                c[0] += 1;
+            byCat[r.q.cat] = c;
+        });
+        const weak = Object.entries(byCat).filter(([, [c, t]]) => c < t).sort((a, b) => a[1][0] / a[1][1] - b[1][0] / b[1][1]).slice(0, 3);
+        const cond = conditionKey(count, mode, level);
+        setLastTrial({ cond, score: sc.score, ms: Math.round(ms), correct: sc.correct, total: sc.total, rank });
+        let saved = false;
+        root.replaceChildren(stateful({ nick: getState().nick, saved: false, pb: false }, (s, set2) => h('div', null, h('div.card.clear', null, h('h1', null, status === 'timeout' ? '⏰ タイムアップ！' : '🏁 結果'), h('div.grade', { role: 'img', 'aria-label': `ランク ${rank}` }, h('span.grade-letter', null, rank), h('span', null, 'ランク')), h('div.clear-stats', null, h('div', null, h('span.muted', null, 'スコア'), h('strong.xp-big', null, `${sc.score}`), h('span.muted.small', null, `（満点換算 ${sc.maxPossible}）`)), h('div', null, h('span.muted', null, '正答率'), h('strong', null, `${Math.round(sc.accuracy * 100)}%`), h('span.muted.small', null, `${sc.correct} / ${sc.total}`)), h('div', null, h('span.muted', null, '所要時間'), h('strong', null, fmtSec(ms))), h('div', null, h('span.muted', null, '速度ボーナス'), h('strong', null, `+${sc.speedBonus}`), h('span.muted.small', null, '（正解分のみ）'))), h('p.muted.small', null, `条件：${cond}｜計算：（配点合計 ${sc.basePoints} ＋ 速度ボーナス ${sc.speedBonus}）× 正答率 ${Math.round(sc.accuracy * 100)}%`), weak.length ? h('div.note.note-info', null, h('strong', null, '苦手カテゴリ：'), weak.map(([cat, [c, t]]) => h('div', null, `${CAT_LABEL[cat]}（${c} / ${t}）`))) : h('div.note.note-info', null, '全問正解！苦手カテゴリはありません。'), h('div.save', null, h('h2', null, 'この端末内の記録に保存（任意）'), h('p.muted.small', null, '保存すると「ランキング」画面（この端末内の、出題条件ごとの記録）に載ります。ニックネームはこの端末にだけ保存され、外部へ送信されません。保存しなければ、この結果は破棄されます。'), s.saved ? h('p', { role: 'status' }, `✔ 保存しました${s.pb ? '（自己ベスト更新！）' : ''}`) : h('div.row', null, h('label', null, 'ニックネーム（12文字まで・個人情報は入れないでください）', h('input', { type: 'text', maxlength: 12, value: s.nick, autocomplete: 'off', 'data-fk': 'nick', oninput: (e) => { s.nick = e.target.value; } })), h('button.btn.primary', { type: 'button', 'data-fk': 'save', onclick: () => {
+                if (saved)
+                    return;
+                saved = true;
+                const nick = sanitizeNick(s.nick);
+                setNick(nick);
+                const rec = { id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, at: new Date().toISOString(), nick, cond, count, mode, level, score: sc.score, correct: sc.correct, total: sc.total, ms: Math.round(ms), byCat, status };
+                const { personalBest } = addTrial(rec);
+                set2({ saved: true, pb: personalBest });
+            } }, '保存する'))), h('div.actions', null, h('button.btn.primary', { type: 'button', onclick: () => setup() }, 'もう一度挑戦する'), h('a.btn.ghost', { href: '#/ranking' }, 'ランキングを見る'), h('a.btn.ghost', { href: '#/share/trial' }, '結果カードを作る（出題条件・スコア・タイム）'))), h('div.card', null, h('h2', null, '全問の解説'), h('ol.review', null, results.map((r) => h('li', null, h('div', null, h('span', { class: `fit ${r.answered && r.correct ? 'fit-good' : 'fit-poor'}` }, r.answered ? (r.correct ? '✔ 正解' : '✘ 不正解') : '✘ 未回答'), ' ', h('span.chip', null, CAT_LABEL[r.q.cat]), h('span.chip', null, DIFF_LABEL[r.q.diff]), h('span.chip', null, `${questionPoints(r.q)}点`), r.answered ? h('span.muted.small', null, ` ${fmtSec(r.ms)}`) : null), h('p', null, h('strong', null, r.q.prompt)), h('p.small', null, h('strong', null, '正解：'), correctText(r.q)), h('p.small.muted', null, r.q.explain))))))));
+    }
+    void SERVICE;
+    setup();
+    return root;
+}
+
+return { correctText, rankOf, trialPage };
+})();
+__m["main.js"] = (() => {
+// エントリポイント：ハッシュルーター・共通レイアウト・トースト・XP演出
+const { h } = __m["dom.js"];
+const { SERVICE, levelFor } = __m["config/game.js"];
+const { dashboardPage, homePage } = __m["components/home.js"];
+const { factsPage, privacyPage, rankingPage, sharePage } = __m["components/pages.js"];
+const { stageRunner } = __m["components/stageRunner.js"];
+const { trialPage } = __m["components/trial.js"];
+const { logo } = __m["components/ui.js"];
+const { getState, subscribe, toasts, xpFx } = __m["state/store.js"];
+const main = document.getElementById('main');
+const nav = document.getElementById('nav');
+const toastBox = document.getElementById('toasts');
+const fxBox = document.getElementById('xpfx');
+const reduce = () => getState().settings.reduceMotion || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function applyMotion() {
+    document.documentElement.setAttribute('data-motion', reduce() ? 'reduce' : 'full');
+}
+// ── トースト（実績・レベルアップ）：控えめな表示。スクリーンリーダーにも通知される ──
+toasts.push = (title, sub) => {
+    const t = h('div.toast', null, h('strong', null, title), sub ? h('div.small', null, sub) : null);
+    toastBox.append(t);
+    window.setTimeout(() => t.remove(), 4500);
+};
+xpFx.push = (n) => {
+    const f = h('div.xpfloat', { 'aria-hidden': 'true' }, `+${n} XP`);
+    fxBox.append(f);
+    window.setTimeout(() => f.remove(), 1600);
+};
+// ── ヘッダー ──
+const NAV = [['#/', 'ホーム'], ['#/dashboard', 'ダッシュボード'], ['#/trial', 'CYBER TRIAL'], ['#/ranking', 'ランキング'], ['#/facts', '事実と出典'], ['#/privacy', 'プライバシー']];
+const lvChip = h('span.lvchip', { 'aria-label': '現在のレベルとXP' });
+function paintChip() {
+    const st = getState();
+    const lv = levelFor(st.xp);
+    lvChip.textContent = `Lv.${lv.lv} ${lv.name}｜${st.xp} XP`;
+}
+function paintNav() {
+    const cur = location.hash || '#/';
+    nav.replaceChildren(...NAV.map(([href, label]) => h('a', { href, 'aria-current': cur === href || (href !== '#/' && cur.startsWith(href)) ? 'page' : null }, label)));
+}
+const brand = document.getElementById('brand');
+brand.append(logo(), h('span.brand-text', null, SERVICE.name));
+document.getElementById('lvslot').append(lvChip);
+paintChip();
+subscribe(() => { paintChip(); applyMotion(); });
+// ── ルーター ──
+function route() {
+    const hash = location.hash.replace(/^#\/?/, '');
+    const [page, arg] = hash.split('/');
+    let view;
+    let title = SERVICE.name;
+    try {
+        switch (page) {
+            case '':
+                view = homePage();
+                break;
+            case 'stage':
+                view = stageRunner(arg ?? '');
+                title = `ステージ｜${SERVICE.name}`;
+                break;
+            case 'dashboard':
+                view = dashboardPage();
+                title = `ダッシュボード｜${SERVICE.name}`;
+                break;
+            case 'trial':
+                view = trialPage();
+                title = `CYBER TRIAL｜${SERVICE.name}`;
+                break;
+            case 'ranking':
+                view = rankingPage();
+                title = `ランキング｜${SERVICE.name}`;
+                break;
+            case 'share':
+                view = sharePage(arg);
+                title = `結果カード｜${SERVICE.name}`;
+                break;
+            case 'facts':
+                view = factsPage(arg);
+                title = `事実と出典｜${SERVICE.name}`;
+                break;
+            case 'privacy':
+                view = privacyPage();
+                title = `プライバシー｜${SERVICE.name}`;
+                break;
+            default:
+                view = h('div.card', null, h('h1', null, 'ページが見つかりません'), h('p', null, 'URLが正しいか確認してください。'), h('a.btn.primary', { href: '#/' }, 'ホームへ'));
+        }
+    }
+    catch (e) {
+        // 画面描画の失敗でアプリ全体が止まらないようにする（原因はコンソールに出す）
+        console.error(e);
+        view = h('div.card', null, h('h1', null, '表示中にエラーが発生しました'), h('p', null, 'ページを再読み込みしてください。解決しない場合は、ホームに戻って別のページからやり直してください。進捗は保存済みです。'), h('a.btn.primary', { href: '#/' }, 'ホームへ'));
+    }
+    document.title = title;
+    main.replaceChildren(view);
+    paintNav();
+    if (page !== 'facts' || !arg)
+        window.scrollTo({ top: 0 });
+    if (page !== 'stage') {
+        const hd = main.querySelector('h1, h2');
+        if (hd) {
+            hd.setAttribute('tabindex', '-1');
+            hd.focus({ preventScroll: true });
+        }
+    }
+}
+window.addEventListener('hashchange', route);
+applyMotion();
+route();
+
+return {  };
+})();
+})();</script>
+</body>
+</html>
